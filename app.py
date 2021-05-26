@@ -55,7 +55,7 @@ def respond():
         
         # reply_markup = ReplyKeyboardMarkup([['good','bad'],['yes','no']],resize_keyboard=True,one_time_keyboard=True)
         keys = []
-        keys.append([InlineKeyboardButton(text='Pincode')])
+        keys.append([InlineKeyboardButton(text='Pincode',callback_data='3'),InlineKeyboardButton(text='District',callback_data='2')])
         reply_markup = InlineKeyboardMarkup(keys)
         bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_markup=reply_markup)
 
