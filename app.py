@@ -6,7 +6,7 @@ import re
 import configparser
 from flask import Flask, request
 import telegram
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup
 
 
 
@@ -50,9 +50,14 @@ def respond():
                 6. use /help for me to repeat all this for you
         """
         # send the welcoming message
-        bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
+        # bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
 
-        reply_markup = ReplyKeyboardMarkup([['good','bad'],['yes','no']],resize_keyboard=True,one_time_keyboard=True)
+        
+        # reply_markup = ReplyKeyboardMarkup([['good','bad'],['yes','no']],resize_keyboard=True,one_time_keyboard=True)
+        keys = []
+        keys.append(KeyboardButton(text='Pincode'))
+        keys.append(KeyboardButton(text='District'))
+        reply_markup = InlineKeyboardMarkup(keys)
         bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_markup=reply_markup)
 
    else:
