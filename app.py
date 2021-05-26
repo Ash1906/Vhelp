@@ -38,13 +38,21 @@ def respond():
    print("got text message :", text)
    # the first time you chat with the bot AKA the welcoming message
    if text == "/start":
-       # print the welcoming message
-       bot_welcome = """
-       Welcome to vaccine alocation  bot, the bot is using the service from http://avatars.adorable.io/ to generate cool looking avatars based on the name you enter so please enter a name and the bot will reply with an avatar for your name.
-       """
-       # send the welcoming message
-       bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
+        # print the welcoming message
+        bot_welcome = """
+                I am here to hep you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
+                1. use /start to initialize me 
+                2. use /news to get an update on current covid news on your area.
+                3. use /bore and I will send you jokes to make you laugh.
+                4. use /hospital to get contact number of your local hospitals and doctors available publicaly
+                5. use /medical to  get contact pharmacies of your local area
+                6. use /help for me to repeat all this for you
+        """
+        # send the welcoming message
+        bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
 
+        reply_markup = bot.ReplyKeyboardMarkup([['good','bad'],['yes','no']],resize_keyboard=True,one_time_keyboard=True)
+        bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_markup=reply_markup)
 
    else:
        try:
