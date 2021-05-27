@@ -25,9 +25,8 @@ bot = telegram.Bot(token=TOKEN)
 country = Country()
 states = country.get_states()
 
-covid_data_state = []
 covid_data_state_dict = {}
-covid_data_district = []
+covid_data_district_dict = {}
 
 app = Flask(__name__)
 
@@ -109,8 +108,8 @@ def respond():
         keys.append([InlineKeyboardButton(text='State',callback_data='state'),InlineKeyboardButton(text='District',callback_data='dis')])
         reply_markup = InlineKeyboardMarkup(keys)
         bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
-        global covid_data_state
         global covid_data_state_dict
+        global covid_data_district_dict
         covid_data_state = requests.get(news_api_state)
         covid_data_state = covid_data_state.json()
         covid_data_state_dict = {}
@@ -118,28 +117,40 @@ def respond():
             if i['state_name'] == '':
                 i['state_name'] = 'Unknown'
             covid_data_state_dict[i['state_name']] = i
+        
+        covid_data_district_dict = {}
         covid_data_district = requests.get(news_api_district)
         covid_data_district = covid_data_district.json()
+        states_present = covid_data_district[s]['districtData']
+        for s in country.get_flat_states():
+            if s in states_present:
+                covid_data_district_dict.update(covid_data_district[s]['districtData'])
+
+
 
     else:
         try:
             covid_req = {}
             print(text)
             print(country.get_flat_states())
+            print(covid_data_district_dict.keys())
             if text in country.get_flat_states():
-                print(covid_data_state_dict)
                 covid_req = covid_data_state_dict[text]
                 print(covid_req)
                 covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
                 bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
-            # elif text in 
+            elif text in covid_data_district_dict:
+                covid_req = covid_data_district_dict[text]
+                print(covid_req)
+                covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['new_cured'],covid_req['recovered'],covid_req['deceased'],covid_req['confirmed'])
+                bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
             
 
 
             # clear the message we got from any non alphabets
             text = re.sub(r"\W", "_", text)
             # create the api link for the avatar based on http://avatars.adorable.io/
-            url = "https://api.adorable.io/avatars/285/{}.png".format(text.strip())
+            url = "https://api.adorable.io/avatars/285/{}.png".format('good')
             # reply with a photo to the name the user sent,
             # note that you can send photos by url and telegram will fetch it for you
             bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
