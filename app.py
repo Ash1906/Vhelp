@@ -123,6 +123,7 @@ def respond():
         try:
             covid_req = {}
             print(text)
+            print(country.get_flat_states())
             if text in country.get_flat_states():
                 covid_req = covid_data_state_dict[text]
                 print(covid_req)
