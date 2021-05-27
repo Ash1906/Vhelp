@@ -111,10 +111,11 @@ def respond():
         bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
         covid_data_state = requests.get(news_api_state)
         covid_data_state = covid_data_state.json()
+        covid_data_state_dict = {}
         for i in covid_data_state:
             if i['state_name'] == '':
                 i['state_name'] = 'Unknown'
-        covid_data_state_dict[i['state_name']] = i
+            covid_data_state_dict[i['state_name']] = i
         covid_data_district = requests.get(news_api_district)
         covid_data_district = covid_data_district.json()
 
