@@ -141,7 +141,7 @@ def respond():
             elif text in covid_data_district_dict:
                 covid_req = covid_data_district_dict[text]
                 print(covid_req)
-                covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['new_cured'],covid_req['recovered'],covid_req['deceased'],covid_req['confirmed'])
+                covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                 bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
             
 
