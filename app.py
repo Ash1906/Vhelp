@@ -25,43 +25,60 @@ bot = telegram.Bot(token=TOKEN)
 
 app = Flask(__name__)
 
+states = ['Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh', 'Chhattisgarh', 'Dadra and Nagar Haveli', 'Daman and Diu', 'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka', 'Kerala', 'Ladakh', 'Lakshadweep', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal']
+District = []
+
+
 @app.route('/{}'.format(TOKEN), methods=['POST'])
 def respond():
-   # retrieve the message in JSON and then transform it to Telegram object
-   update = telegram.Update.de_json(request.get_json(force=True), bot)
-   call_back_query = update.callback_query
-   print(call_back_query)
-   chat_id = update.message.chat.id
-   msg_id = update.message.message_id
+    # retrieve the message in JSON and then transform it to Telegram object
+    update = telegram.Update.de_json(request.get_json(force=True), bot)
+    print(update)
+    callback_query = update.callback_query
+    if callback_query is not None:
+        if callback_query.data == "state":
+            reply_markup = ReplyKeyboardMarkup([states],resize_keyboard=True,one_time_keyboard=True)
+            bot.sendMessage(chat_id=callback_data.from.id, text='Enter the state name', reply_markup=reply_markup,reply_to_message_id=callback_data.message.message_id)
+        return 'ok'
+    chat_id = update.message.chat.id
+    msg_id = update.message.message_id
 
-   # Telegram understands UTF-8, so encode text for unicode compatibility
-   text = update.message.text.encode('utf-8').decode()
-   # for debugging purposes only
-   print("got text message :", text)
-   # the first time you chat with the bot AKA the welcoming message
-   if text == "/start":
+    # Telegram understands UTF-8, so encode text for unicode compatibility
+    text = update.message.text.encode('utf-8').decode()
+    # for debugging purposes only
+    print("got text message :", text)
+    # the first time you chat with the bot AKA the welcoming message
+    if text == "/start":
         # print the welcoming message
         bot_welcome = """
-                I am here to hep you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
+                I am here to help you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
                 1. use /start to initialize me 
                 2. use /news to get an update on current covid news on your area.
                 3. use /bore and I will send you jokes to make you laugh.
                 4. use /hospital to get contact number of your local hospitals and doctors available publicaly
                 5. use /medical to  get contact pharmacies of your local area
+                6. use /check for check availability of slots
                 6. use /help for me to repeat all this for you
         """
         # send the welcoming message
-        # bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
+        bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
 
         
         # reply_markup = ReplyKeyboardMarkup([['good','bad'],['yes','no']],resize_keyboard=True,one_time_keyboard=True)
-        keys = []
-        keys.append([InlineKeyboardButton(text='Pincode',callback_data='3'),InlineKeyboardButton(text='District',callback_data='2')])
-        reply_markup = InlineKeyboardMarkup(keys)
-        bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_markup=reply_markup)
 
-   else:
-       try:
+    elif text == "/check":
+        bot_location = "HI! Give me Your location"
+        keys = []
+        keys.append([InlineKeyboardButton(text='Pincode',callback_data='pin'),InlineKeyboardButton(text='District',callback_data='dis')])
+        reply_markup = InlineKeyboardMarkup(keys)
+        bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
+    elif text == "/news":
+        keys = []
+        keys.append([InlineKeyboardButton(text='State',callback_data='state'),InlineKeyboardButton(text='District',callback_data='dis')])
+        reply_markup = InlineKeyboardMarkup(keys)
+        bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
+    else:
+        try:
            # clear the message we got from any non alphabets
            text = re.sub(r"\W", "_", text)
            # create the api link for the avatar based on http://avatars.adorable.io/
@@ -69,7 +86,7 @@ def respond():
            # reply with a photo to the name the user sent,
            # note that you can send photos by url and telegram will fetch it for you
            bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
-       except Exception:
+        except Exception:
            # if things went wrong
            bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
 
