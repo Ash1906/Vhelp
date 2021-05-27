@@ -39,8 +39,10 @@ def respond():
         if callback_query.data == "state":
             bot_state = "Enter the state name"
             reply_markup = ReplyKeyboardMarkup([states],resize_keyboard=True,one_time_keyboard=True)
-            bot.sendMessage(chat_id=callback_data.from.id, text=bot_state, reply_markup=reply_markup,reply_to_message_id=callback_data.message.message_id)
-        return 'ok'
+            bot.sendMessage(chat_id=callback_query.message.from_user.id,text=bot_state, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+            return 'ok'
+
+
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
 
@@ -92,7 +94,7 @@ def respond():
            # if things went wrong
            bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
 
-   return 'ok'
+    return 'ok'
 
 @app.route('/set_webhook', methods=['GET', 'POST'])
 def set_webhook():
