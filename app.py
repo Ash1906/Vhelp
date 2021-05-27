@@ -8,7 +8,7 @@ from flask import Flask, request
 import telegram
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup,InlineKeyboardButton
 
-
+from country import Country
 
 parser = configparser.ConfigParser()
 parser.read('credentials/config.conf')
@@ -22,23 +22,17 @@ TOKEN = parser['Telebot']['token']
 URL = parser['Telebot']['URL']
 bot = telegram.Bot(token=TOKEN)
 
+country = Country()
+states = country.get_states()
+
+global covid_data_state
+global covid_data_district
 
 app = Flask(__name__)
 
-states = [['Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh'],
- ['Assam', 'Bihar', 'Chandigarh'],
- ['Chhattisgarh', 'Dadra and Nagar Haveli', 'Daman and Diu'],
- ['Delhi', 'Goa', 'Gujarat'],
- ['Haryana', 'Himachal Pradesh', 'Jammu and Kashmir'],
- ['Jharkhand', 'Karnataka', 'Kerala'],
- ['Ladakh', 'Lakshadweep', 'Madhya Pradesh'],
- ['Maharashtra', 'Manipur', 'Meghalaya'],
- ['Mizoram', 'Nagaland', 'Odisha'],
- ['Puducherry', 'Punjab', 'Rajasthan'],
- ['Sikkim', 'Tamil Nadu', 'Telangana'],
- ['Tripura', 'Uttar Pradesh', 'Uttarakhand']]
 
-news_api = 'https://api.covid19india.org/state_district_wise.json'
+news_api_district = 'https://api.covid19india.org/state_district_wise.json'
+news_api_state = 'https://www.mohfw.gov.in/data/datanew.json'
 
 
 District = []
@@ -52,11 +46,26 @@ def respond():
     print(update)
     if callback_query is not None:
         if callback_query.data == "state":
-            bot_state = "Enter the state name"
+            bot_state = "Enter the state name:"
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
-            h = bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_state, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
-            print(h)
+            bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_state, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
             return 'ok'
+        elif callback_query.data == "dis":
+            bot_district = "Enter the State for which it belongs:"
+            reply_markup = InlineKeyboardMarkup()
+            for i in states:
+                disctric_key = []
+                for j in i:
+                    disctric_key.append(InlineKeyboardButton(text=j,callback_data=j))
+                reply_markup.add(disctric_key)
+            bot.sendMessage(chat_id=callback_query.message.chat.id, text=bot_district, reply_markup=reply_markup,reply_to_message_id=callback_query.message.message_id)
+        else:
+            if callback_query.data in country.get_flat_states():
+                bot_district = "Enter the district:"
+                districts = country.get_district(callback_query.data)
+                reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
+                bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_district, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+
 
     if update.message is None:
         return 'BAD request'
@@ -98,18 +107,28 @@ def respond():
         keys.append([InlineKeyboardButton(text='State',callback_data='state'),InlineKeyboardButton(text='District',callback_data='dis')])
         reply_markup = InlineKeyboardMarkup(keys)
         bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
+        covid_data_state = requests.get(news_api_state)
+        covid_data_state = covid_data.json()
+        covid_data_district = requests.get(news_api_district)
+        covid_data_district = covid_data.json()
     else:
         try:
-           # clear the message we got from any non alphabets
-           text = re.sub(r"\W", "_", text)
-           # create the api link for the avatar based on http://avatars.adorable.io/
-           url = "https://api.adorable.io/avatars/285/{}.png".format(text.strip())
-           # reply with a photo to the name the user sent,
-           # note that you can send photos by url and telegram will fetch it for you
-           bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
+            # covid_req = {}
+            # if text in [j for i in states for j in i]:
+                # covid_req = covid_data_state[text]
+            
+
+
+            # clear the message we got from any non alphabets
+            text = re.sub(r"\W", "_", text)
+            # create the api link for the avatar based on http://avatars.adorable.io/
+            url = "https://api.adorable.io/avatars/285/{}.png".format(text.strip())
+            # reply with a photo to the name the user sent,
+            # note that you can send photos by url and telegram will fetch it for you
+            bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
         except Exception:
-           # if things went wrong
-           bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
+            # if things went wrong
+            bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
 
     return 'ok'
 
