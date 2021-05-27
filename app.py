@@ -54,10 +54,12 @@ def respond():
         if callback_query.data == "state":
             bot_state = "Enter the state name"
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
-            bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_state, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+            h = bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_state, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+            print(h)
             return 'ok'
 
-
+    if update.messsage is None:edit msg text telegram bot
+        return 'BAD request'
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
 
