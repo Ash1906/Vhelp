@@ -37,8 +37,9 @@ def respond():
     callback_query = update.callback_query
     if callback_query is not None:
         if callback_query.data == "state":
+            bot_state = "Enter the state name"
             reply_markup = ReplyKeyboardMarkup([states],resize_keyboard=True,one_time_keyboard=True)
-            bot.sendMessage(chat_id=callback_data.from.id, text='Enter the state name', reply_markup=reply_markup,reply_to_message_id=callback_data.message.message_id)
+            bot.sendMessage(chat_id=callback_data.from.id, text=bot_state, reply_markup=reply_markup,reply_to_message_id=callback_data.message.message_id)
         return 'ok'
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
@@ -73,6 +74,7 @@ def respond():
         reply_markup = InlineKeyboardMarkup(keys)
         bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
     elif text == "/news":
+        bot_location = "For which region you want data?"
         keys = []
         keys.append([InlineKeyboardButton(text='State',callback_data='state'),InlineKeyboardButton(text='District',callback_data='dis')])
         reply_markup = InlineKeyboardMarkup(keys)
