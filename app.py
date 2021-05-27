@@ -121,9 +121,8 @@ def respond():
         covid_data_district_dict = {}
         covid_data_district = requests.get(news_api_district)
         covid_data_district = covid_data_district.json()
-        states_present = covid_data_district[s]['districtData']
         for s in country.get_flat_states():
-            if s in states_present:
+            if s in covid_data_district:
                 covid_data_district_dict.update(covid_data_district[s]['districtData'])
 
 
