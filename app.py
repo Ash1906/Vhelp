@@ -53,7 +53,7 @@ def respond():
     if callback_query is not None:
         if callback_query.data == "state":
             bot_state = "Enter the state name"
-            reply_markup = ReplyKeyboardMarkup([states],resize_keyboard=True,one_time_keyboard=True)
+            reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
             bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_state, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
             return 'ok'
 
