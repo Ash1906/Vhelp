@@ -52,12 +52,13 @@ def respond():
             return 'ok'
         elif callback_query.data == "dis":
             bot_district = "Enter the State for which it belongs:"
-            reply_markup = InlineKeyboardMarkup()
+            reply_markup = []
             for i in states:
                 disctric_key = []
                 for j in i:
                     disctric_key.append(InlineKeyboardButton(text=j,callback_data=j))
-                reply_markup.add(disctric_key)
+                reply_markup.append(disctric_key)
+            reply_markup = InlineKeyboardMarkup(reply_markup)
             bot.sendMessage(chat_id=callback_query.message.chat.id, text=bot_district, reply_markup=reply_markup,reply_to_message_id=callback_query.message.message_id)
         else:
             if callback_query.data in country.get_flat_states():
