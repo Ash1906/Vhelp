@@ -122,11 +122,11 @@ def respond():
     else:
         try:
             covid_req = {}
-            if text in [j for i in country.get_flat_states() for j in i]:
+            if text in [j for i in states for j in i]:
                 covid_req = covid_data_state_dict[text]
                 covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
                 bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
-
+            elif text in 
             
 
 
