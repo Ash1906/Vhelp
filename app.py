@@ -108,9 +108,9 @@ def respond():
         reply_markup = InlineKeyboardMarkup(keys)
         bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
         covid_data_state = requests.get(news_api_state)
-        covid_data_state = covid_data.json()
+        covid_data_state = covid_data_state.json()
         covid_data_district = requests.get(news_api_district)
-        covid_data_district = covid_data.json()
+        covid_data_district = covid_data_district.json()
     else:
         try:
             # covid_req = {}
