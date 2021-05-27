@@ -7,7 +7,7 @@ import configparser
 from flask import Flask, request
 import telegram
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup,InlineKeyboardButton
-
+import requests
 from country import Country
 
 parser = configparser.ConfigParser()
