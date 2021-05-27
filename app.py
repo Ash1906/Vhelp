@@ -25,9 +25,9 @@ bot = telegram.Bot(token=TOKEN)
 country = Country()
 states = country.get_states()
 
-covid_data_state
+covid_data_state = []
 covid_data_state_dict = {}
-covid_data_district
+covid_data_district = []
 
 app = Flask(__name__)
 
