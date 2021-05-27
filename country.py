@@ -5,6 +5,9 @@ class Country:
 
     states = [['Andaman and Nicobar Islands', 'Andhra Pradesh'], ['Arunachal Pradesh', 'Assam', 'Bihar'], ['Chandigarh', 'Chhattisgarh', 'Delhi'], ['Goa', 'Gujarat', 'Haryana'], ['Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand'], ['Karnataka', 'Kerala', 'Ladakh'], ['Lakshadweep', 'Madhya Pradesh', 'Maharashtra'], ['Manipur', 'Meghalaya', 'Mizoram'], ['Nagaland', 'Odisha', 'Puducherry'], ['Punjab', 'Rajasthan', 'Sikkim'], ['Tamil Nadu', 'Telangana', 'Tripura'], ['Uttar Pradesh', 'Uttarakhand', 'West Bengal'], ['Dadra and Nagar Haveli and Daman and Diu','Unknown']]
 
+    flat_states = ['Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh', 'Chhattisgarh', 'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka', 'Kerala', 'Ladakh', 'Lakshadweep', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Dadra and Nagar Haveli and Daman and Diu','Unknown']
+
+
 
 
     
@@ -12,7 +15,7 @@ class Country:
         return self.states
 
     def get_flat_states(self):
-        return list(self.district_wise.keys())
+        return self.flat_states
 
     def get_district(self,state):
         return self.district_wise[state]
