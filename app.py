@@ -26,7 +26,7 @@ country = Country()
 states = country.get_states()
 
 global covid_data_state
-global covid_data_state_dict = {}
+global covid_data_state_dict
 global covid_data_district
 
 app = Flask(__name__)
