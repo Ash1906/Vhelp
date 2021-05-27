@@ -25,7 +25,22 @@ bot = telegram.Bot(token=TOKEN)
 
 app = Flask(__name__)
 
-states = ['Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh', 'Chhattisgarh', 'Dadra and Nagar Haveli', 'Daman and Diu', 'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka', 'Kerala', 'Ladakh', 'Lakshadweep', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal']
+states = [['Andaman and Nicobar Islands' 'Andhra Pradesh' 'Arunachal Pradesh']
+ ['Assam' 'Bihar' 'Chandigarh']
+ ['Chhattisgarh' 'Dadra and Nagar Haveli' 'Daman and Diu']
+ ['Delhi' 'Goa' 'Gujarat']
+ ['Haryana' 'Himachal Pradesh' 'Jammu and Kashmir']
+ ['Jharkhand' 'Karnataka' 'Kerala']
+ ['Ladakh' 'Lakshadweep' 'Madhya Pradesh']
+ ['Maharashtra' 'Manipur' 'Meghalaya']
+ ['Mizoram' 'Nagaland' 'Odisha']
+ ['Puducherry' 'Punjab' 'Rajasthan']
+ ['Sikkim' 'Tamil Nadu' 'Telangana']
+ ['Tripura' 'Uttar Pradesh' 'Uttarakhand']]
+
+news_api = 'https://api.covid19india.org/state_district_wise.json'
+
+
 District = []
 
 
@@ -33,7 +48,6 @@ District = []
 def respond():
     # retrieve the message in JSON and then transform it to Telegram object
     update = telegram.Update.de_json(request.get_json(force=True), bot)
-    print(update)
     callback_query = update.callback_query
     if callback_query is not None:
         if callback_query.data == "state":
