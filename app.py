@@ -26,6 +26,7 @@ country = Country()
 states = country.get_states()
 
 global covid_data_state
+global covid_data_state_dict
 global covid_data_district
 
 app = Flask(__name__)
@@ -110,13 +111,21 @@ def respond():
         bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
         covid_data_state = requests.get(news_api_state)
         covid_data_state = covid_data_state.json()
+        for i in covid_data_state:
+            if i['state_name'] == '':
+                i['state_name'] = 'Unknown'
+        covid_data_state_dict[i['state_name']] = i
         covid_data_district = requests.get(news_api_district)
         covid_data_district = covid_data_district.json()
+
     else:
         try:
-            # covid_req = {}
-            # if text in [j for i in states for j in i]:
-                # covid_req = covid_data_state[text]
+            covid_req = {}
+            if text in [j for i in country.get_flat_states() for j in i]:
+                covid_req = covid_data_state_dict[text]
+                covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
+                bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
+
             
 
 
