@@ -113,6 +113,7 @@ def respond():
         global covid_data_state_dict
         covid_data_state = requests.get(news_api_state)
         covid_data_state = covid_data_state.json()
+        covid_data_state_dict = {}
         for i in covid_data_state:
             if i['state_name'] == '':
                 i['state_name'] = 'Unknown'
