@@ -18,7 +18,7 @@ class Country:
         return self.flat_states
 
     def get_district(self,state):
-        if state in district_wise
+        if state in district_wise:
             return self.district_wise[state]
         else:
             return 'Error'
