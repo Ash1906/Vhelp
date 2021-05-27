@@ -58,7 +58,7 @@ def respond():
             print(h)
             return 'ok'
 
-    if update.messsage is None:edit msg text telegram bot
+    if update.messsage is None:
         return 'BAD request'
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
