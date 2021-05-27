@@ -125,6 +125,7 @@ def respond():
         print(text)
         print(country.get_flat_states())
         if text in country.get_flat_states():
+            print(covid_data_state_dict)
             covid_req = covid_data_state_dict[text]
             print(covid_req)
             covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
