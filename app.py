@@ -92,15 +92,15 @@ def respond():
         """
         # send the welcoming message
         bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
-     elif text == "/bore":
-         re = requests.get("https://official-joke-api.appspot.com/random_joke")
-#print(re.status_code)
-#print(re.text)
-         dict = re.json()
-         punch = dict['setup'] +" " +  dict['punchline']
+    elif text == "/bore":
+        re = requests.get("https://official-joke-api.appspot.com/random_joke")
+            #print(re.status_code)
+            #print(re.text)
+        dict = re.json()
+        punch = dict['setup'] +" " +  dict['punchline']
 
-        # print the welcoming message
-        # send the welcoming message
+                # print the welcoming message
+                # send the welcoming message
         bot.sendMessage(chat_id=chat_id, text=punch, reply_to_message_id=msg_id)
 
         
