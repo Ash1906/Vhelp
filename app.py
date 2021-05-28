@@ -92,6 +92,16 @@ def respond():
         """
         # send the welcoming message
         bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
+     elif text == "/bore":
+         re = requests.get("https://official-joke-api.appspot.com/random_joke")
+#print(re.status_code)
+#print(re.text)
+         dict = re.json()
+         punch = dict['setup'] +" " +  dict['punchline']
+
+        # print the welcoming message
+        # send the welcoming message
+        bot.sendMessage(chat_id=chat_id, text=punch, reply_to_message_id=msg_id)
 
         
         # reply_markup = ReplyKeyboardMarkup([['good','bad'],['yes','no']],resize_keyboard=True,one_time_keyboard=True)
@@ -102,6 +112,7 @@ def respond():
         keys.append([InlineKeyboardButton(text='Pincode',callback_data='pin'),InlineKeyboardButton(text='District',callback_data='dis')])
         reply_markup = InlineKeyboardMarkup(keys)
         bot.sendMessage(chat_id=chat_id, text=bot_location, reply_markup=reply_markup,reply_to_message_id=msg_id)
+    
     elif text == "/news":
         bot_location = "For which region you want data?"
         keys = []
@@ -152,7 +163,7 @@ def respond():
             url = "https://api.adorable.io/avatars/285/{}.png".format('good')
             # reply with a photo to the name the user sent,
             # note that you can send photos by url and telegram will fetch it for you
-            bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
+            #bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
         except Exception:
             # if things went wrong
             bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
