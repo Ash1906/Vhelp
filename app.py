@@ -1,5 +1,5 @@
 '''
-vaccine bot to help people get vaccinated. new check
+vaccine bot to help people get vaccinated.
 '''
 
 import re
