@@ -208,7 +208,7 @@ def respond():
                 print(text)
                 bot_text = 'Enter  the date:'
                 reply_markup = telegramcalender.create_calendar()
-                bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
+                update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
                 set_track_user(chat_id,'CHECK,'+text)
             elif 'CHECK,' in Track_user[chat_id]:
                 print('work', Track_user[chat_id])
