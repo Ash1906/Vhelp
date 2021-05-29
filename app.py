@@ -57,7 +57,7 @@ def read_user_stat(chat_id):
 
 def update_user_stat(chat_id,stat):
     with open('stat.txt','rb+') as f:
-        status = pickle.load(f1)
+        status = pickle.load(f)
         status[chat_id] = stat
         pickle.dumb(status,f)
 
