@@ -84,7 +84,7 @@ def respond():
             bot_text = "Enter the Pincode name:"
             set_track_user(callback_query.message.chat.id,'CHECK_pin')
             return 'ok'
-        elif callback_query.data in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']
+        elif callback_query.data in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
             selected,date = telegramcalender.process_calendar_selection(bot, update)
             if selected:
                 bot.send_message(chat_id=callback_query.message.chat.id,
