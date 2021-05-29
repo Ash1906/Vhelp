@@ -60,10 +60,12 @@ def read_user_stat(chat_id):
 
 def update_user_stat(chat_id,stat):
     try:
-        with open('stat.txt','rb+') as f:
+        status = []
+        with open('stat.txt','rb') as f:
             status = pickle.load(f)
+        with open('stat.txt','wb') as f:
             status[chat_id] = stat
-            pickle.dump(status,f)
+            pickle.dump(status,f,protocol=pickle.HIGHEST_PROTOCOL)
     except EOFError:
         print('ERROR')
 
