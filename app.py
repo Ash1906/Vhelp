@@ -171,7 +171,7 @@ def respond():
     else:
 
         ##### for debuging ############
-        # print(Track_user)
+        print(Track_user)
         # if Track_user[chat_id] == 'CHECK_date':
         #     print(text)
         #     bot_text = 'Enter  the date:'
