@@ -50,7 +50,7 @@ app = Flask(__name__)
 def read_user_stat(chat_id):
     try:
         with open('stat.txt','rb') as f:
-            status = pickle.loads(f)
+            status = pickle.load(f)
             if chat_id in status:
                 return status[chat_id]
             else:
@@ -63,7 +63,7 @@ def update_user_stat(chat_id,stat):
         with open('stat.txt','rb+') as f:
             status = pickle.load(f)
             status[chat_id] = stat
-            pickle.dumb(status,f)
+            pickle.dump(status,f)
     except EOFError:
         print('ERROR')
 
