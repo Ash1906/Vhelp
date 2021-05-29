@@ -10,7 +10,7 @@ from flask import Flask, request
 import telegram
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup,InlineKeyboardButton
 import requests
-from country import Country
+from country import Country,Track_User
 import telegramcalender
 
 parser = configparser.ConfigParser()
@@ -37,29 +37,24 @@ bot = telegram.Bot(token=TOKEN)
 
 
 country = Country()
+track_user = Track_User()
 states = country.get_states()
 
 covid_data_state_dict = {}
 covid_data_district_dict = {}
 
-Track_user = {}
 
 app = Flask(__name__)
 
 
 District = []
 
-
-def set_track_user(id,text):
-    global Track_user
-    Track_user[id] = text
-
 @app.route('/{}'.format(TOKEN), methods=['POST'])
 def respond():
     # retrieve the message in JSON and then transform it to Telegram object
     update = telegram.Update.de_json(request.get_json(force=True), bot)
     callback_query = update.callback_query
-    print('start',Track_user)
+    print('start',track_user.track_user)
 
 
     #print(update)
@@ -74,17 +69,17 @@ def respond():
             bot_text = "Enter the State name:"
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
             bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
-            print('work call',Track_user)
-            if Track_user[callback_query.message.chat.id] == 'NEWS':
-                set_track_user(callback_query.message.chat.id,'NEWS_dis')
-            elif Track_user[callback_query.message.chat.id] == 'CHECK':
-                set_track_user(callback_query.message.chat.id,'CHECK_dis')
-            print('work after call',Track_user)
+            print('work call',track_user.track_user)
+            if track_user.get_text(callback_query.message.chat.id) == 'NEWS':
+                track_user.set_user(callback_query.message.chat.id,'NEWS_dis')
+            elif track_user.get_text(callback_query.message.chat.id) == 'CHECK':
+                track_user.set_user(callback_query.message.chat.id,'CHECK_dis')
+            print('work after call',track_user.track_user)
             return 'ok'
             
         elif callback_query.data == "pin_slot":
             bot_text = "Enter the Pincode name:"
-            set_track_user(callback_query.message.chat.id,'CHECK_pin')
+            track_user.set_user(callback_query.message.chat.id,'CHECK_pin')
             return 'ok'
 
         # elif callback_query.data in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
@@ -134,7 +129,7 @@ def respond():
         bot.sendMessage(chat_id=chat_id, text=bot_check_avail, reply_markup=reply_markup,reply_to_message_id=msg_id)
 
         ########### track user ##########
-        set_track_user(chat_id,'CHECK')
+        track_user.set_user(chat_id,'CHECK')
 
 
         ##### news ###############
@@ -159,7 +154,7 @@ def respond():
             covid_data_state_dict[i['state_name']] = i
 
         ########### user track id #############
-        set_track_user(chat_id,'NEWS')
+        track_user.set_user(chat_id,'NEWS')
 
         ########### get covid news district wise ##################
         covid_data_district_dict = {}
@@ -174,32 +169,32 @@ def respond():
     else:
 
         ##### for debuging ############
-        print(Track_user)
-        # if Track_user[chat_id] == 'CHECK_date':
+        print(track_user.track_user)
+        # if track_user.get_text(chat_id) == 'CHECK_date':
         #     print(text)
         #     bot_text = 'Enter  the date:'
         #     reply_markup = telegramcalender.create_calendar()
         #     bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
         
         try:
-            print(Track_user[chat_id])
-            if Track_user[chat_id] == 'NEWS_dis':
+            print(track_user.get_text(chat_id))
+            if track_user.get_text(chat_id) == 'NEWS_dis':
                 if text in country.get_flat_states():
                     bot_text = "Enter the district:"
                     districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                    set_track_user(chat_id,'NEWS')
+                    track_user.set_user(chat_id,'NEWS')
                     print(Track_user)
-            elif Track_user[chat_id] == 'CHECK_dis':
+            elif track_user.get_text(chat_id) == 'CHECK_dis':
                 if text in country.get_flat_states():
                     bot_text = "Enter the district:"
                     districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                    set_track_user(chat_id,'CHECK_date')
+                    track_user.set_user(chat_id,'CHECK_date')
                     print(Track_user)
-            elif Track_user[chat_id] == 'NEWS':
+            elif track_user.get_text(chat_id) == 'NEWS':
                 covid_req = {}
                 if text in country.get_flat_states():
                     covid_req = covid_data_state_dict[text]
@@ -210,14 +205,14 @@ def respond():
                     covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
                 print(Track_user)
-            # elif Track_user[chat_id] == 'CHECK_date':
+            # elif track_user.get_text(chat_id) == 'CHECK_date':
             #     print(text)
             #     bot_text = 'Enter  the date:'
             #     reply_markup = telegramcalender.create_calendar()
             #     update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
-            #     set_track_user(chat_id,'CHECK,'+text)
-            # elif 'CHECK,' in Track_user[chat_id]:
-            #     print('work', Track_user[chat_id])
+            #     track_user.set_user(chat_id,'CHECK,'+text)
+            # elif 'CHECK,' in track_user.get_text(chat_id):
+            #     print('work', track_user.get_text(chat_id))
             
 
 

@@ -22,4 +22,18 @@ class Country:
             return self.district_wise[state]
         else:
             return 'Error'
+
+
+class Track_User:
+    track_user = {}
+
+    def get_text(self,id):
+        if id in self.track_user:
+            return self.track_user[id]
+        else:
+            return 'Error'
+
+    def set_user(id,text):
+        self.track_user[id] = text
+
    
