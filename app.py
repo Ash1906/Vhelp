@@ -78,6 +78,7 @@ def respond():
                 set_track_user(callback_query.message.chat.id,'NEWS_dis')
             elif Track_user[callback_query.message.chat.id] == 'CHECK':
                 set_track_user(callback_query.message.chat.id,'CHECK_dis')
+            print('work after call',Track_user)
             return 'ok'
             
         elif callback_query.data == "pin_slot":
