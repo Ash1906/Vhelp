@@ -73,7 +73,7 @@ def respond():
             bot_text = "Enter the State name:"
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
             bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
-            
+            print('work call',Track_user)
             if Track_user[callback_query.message.chat.id] == 'NEWS':
                 set_track_user(callback_query.message.chat.id,'NEWS_dis')
             elif Track_user[callback_query.message.chat.id] == 'CHECK':
@@ -84,6 +84,7 @@ def respond():
             bot_text = "Enter the Pincode name:"
             set_track_user(callback_query.message.chat.id,'CHECK_pin')
             return 'ok'
+
         elif callback_query.data in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
             selected,date = telegramcalender.process_calendar_selection(bot, update)
             if selected:
