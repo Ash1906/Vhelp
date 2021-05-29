@@ -162,14 +162,10 @@ def respond():
 
 
     else:
-<<<<<<< HEAD
 
         ##### for debuging ############
         print(Track_user)
 
-=======
-        print(Track_user)
->>>>>>> heroku/main
         try:
             print(Track_user[chat_id])
             if Track_user[chat_id] == 'NEWS_dis':
@@ -178,22 +174,14 @@ def respond():
                     districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-<<<<<<< HEAD
                     set_track_user(chat_id,'NEWS')
-=======
-                    Track_user[chat_id] = 'NEWS'
->>>>>>> heroku/main
             elif Track_user[chat_id] == 'CHECK_dis':
                 if text in country.get_flat_states():
                     bot_text = "Enter the district:"
                     districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-<<<<<<< HEAD
                     set_track_user(chat_id,'CHECK_date')
-=======
-                    Track_user[chat_id] = 'CHECK'
->>>>>>> heroku/main
             elif Track_user[chat_id] == 'NEWS':
                 covid_req = {}
                 if text in country.get_flat_states():
