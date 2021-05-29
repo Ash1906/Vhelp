@@ -29,6 +29,7 @@ global news_district_api
 ### config #########
 TOKEN = parser['Telebot']['token']
 URL = parser['Telebot']['URL']
+BORE = parser['Extapi']['bore']
 news_state_api = parser['Extapi']['news_state']
 news_district_api = parser['Extapi']['news_district']
 
@@ -69,10 +70,10 @@ def update_user_stat(chat_id,stat):
     except EOFError:
         print('ERROR')
 
-def get_object():
-    with open('stat.txt','rb') as f:
-        status = pickle.load(f)
-        return status
+# def get_object():
+#     with open('stat.txt','rb') as f:
+#         status = pickle.load(f)
+#         return status
 
 District = []
 
@@ -81,9 +82,7 @@ def respond():
     # retrieve the message in JSON and then transform it to Telegram object
     update = telegram.Update.de_json(request.get_json(force=True), bot)
     callback_query = update.callback_query
-    print(get_object())
 
-    print(update)
     if callback_query is not None:
         if callback_query.data == "state_slot":
             bot_text = "Enter the State name:"
@@ -145,7 +144,19 @@ def respond():
         """
         # send the welcoming message
         bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
-
+    elif text == "/help":
+        bot_welcome = """
+                I am here to help you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
+                1. use /start to initialize me 
+                2. use /news to get an update on current covid news on your area.
+                3. use /bore and I will send you jokes to make you laugh.
+                4. use /hospital to get contact number of your local hospitals and doctors available publicaly
+                5. use /medical to  get contact pharmacies of your local area
+                6. use /check_availability for check availability of slots
+                6. use /help for me to repeat all this for you
+        """
+        # send the welcoming message
+        bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
 
     ########### bore #################
     elif text == "/bore":
@@ -189,7 +200,6 @@ def respond():
 
         ########### user track id #############
         update_user_stat(chat_id,'NEWS')
-        print(get_object())
         ########### get covid news district wise ##################
         covid_data_district_dict = {}
         covid_data_district = requests.get(news_district_api)
@@ -210,7 +220,6 @@ def respond():
         #     bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
         
         try:
-            print(get_object())
             print(read_user_stat(chat_id))
             if read_user_stat(chat_id) == 'NEWS_dis':
                 if text in country.get_flat_states():
@@ -237,23 +246,13 @@ def respond():
                     covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
             elif read_user_stat(chat_id) == 'CHECK_date':
-                print(text)
                 bot_text = 'Enter  the date:'
                 reply_markup = telegramcalender.create_calendar()
                 update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
                 update_user_stat(chat_id,'CHECK,'+text)
             elif 'CHECK,' in read_user_stat(chat_id):
                 print('work', read_user_stat(chat_id))
-            
 
-
-            # clear the message we got from any non alphabets
-            text = re.sub(r"\W", "_", text)
-            # create the api link for the avatar based on http://avatars.adorable.io/
-            url = "https://api.adorable.io/avatars/285/{}.png".format('good')
-            # reply with a photo to the name the user sent,
-            # note that you can send photos by url and telegram will fetch it for you
-            bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
         except Exception:
             # if things went wrong
             bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
