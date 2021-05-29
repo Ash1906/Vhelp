@@ -48,18 +48,24 @@ covid_data_district_dict = {}
 app = Flask(__name__)
 
 def read_user_stat(chat_id):
-    with open('stat.txt','rb') as f:
-        status = pickle.loads(b)
-        if chat_id in status:
-            return status[chat_id]
-        else:
-            'Error'
+    try:
+        with open('stat.txt','rb') as f:
+            status = pickle.loads(f)
+            if chat_id in status:
+                return status[chat_id]
+            else:
+                'Error'
+    except EOFError:
+        print('ERROR')
 
 def update_user_stat(chat_id,stat):
-    with open('stat.txt','rb+') as f:
-        status = pickle.load(f)
-        status[chat_id] = stat
-        pickle.dumb(status,f)
+    try:
+        with open('stat.txt','rb+') as f:
+            status = pickle.load(f)
+            status[chat_id] = stat
+            pickle.dumb(status,f)
+    except EOFError:
+        print('ERROR')
 
 
 District = []
