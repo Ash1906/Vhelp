@@ -68,6 +68,8 @@ def respond():
             bot_text = "Enter the District name:"
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
             bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+            
+            global Track_user
             if Track_user[callback_query.message.chat.id] == 'NEWS':
                 Track_user[callback_query.message.chat.id] = 'NEWS_dis'
             elif Track_user[callback_query.message.chat.id] == 'CHECK':
@@ -76,6 +78,7 @@ def respond():
             
         elif callback_query.data == "pin_slot":
             bot_text = "Enter the Pincode name:"
+            global Track_user
             Track_user[callback_query.message.chat.id] = 'CHECK_pin'
             return 'ok'
 
@@ -118,6 +121,7 @@ def respond():
         bot.sendMessage(chat_id=chat_id, text=bot_check_avail, reply_markup=reply_markup,reply_to_message_id=msg_id)
 
         ########### track user ##########
+        global Track_user
         Track_user[chat_id] = 'CHECK'
 
 
@@ -132,7 +136,7 @@ def respond():
         ################## after sending ###########
         global covid_data_state_dict
         global covid_data_district_dict
-
+        global Track_user
 
         ########### get covid news state wise ##################
         covid_data_state = requests.get(news_state_api)
@@ -160,6 +164,7 @@ def respond():
 
     else:
         try:
+            print(Track_user[chat_id])
             if Track_user[chat_id] == 'NEWS_dis':
                 if text in country.get_flat_states():
                     bot_district = "Enter the district:"
