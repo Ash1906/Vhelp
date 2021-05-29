@@ -179,57 +179,57 @@ def respond():
         #     bot_text = 'Enter  the date:'
         #     reply_markup = telegramcalender.create_calendar()
         #     bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-        print(Track_user[chat_id])
-        if Track_user[chat_id] == 'NEWS_dis':
-            if text in country.get_flat_states():
-                bot_text = "Enter the district:"
-                districts = country.get_district(text)
-                reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
-                bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                set_track_user(chat_id,'NEWS')
+        
+        try:
+            print(Track_user[chat_id])
+            if Track_user[chat_id] == 'NEWS_dis':
+                if text in country.get_flat_states():
+                    bot_text = "Enter the district:"
+                    districts = country.get_district(text)
+                    reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
+                    bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
+                    set_track_user(chat_id,'NEWS')
+                    print(Track_user)
+            elif Track_user[chat_id] == 'CHECK_dis':
+                if text in country.get_flat_states():
+                    bot_text = "Enter the district:"
+                    districts = country.get_district(text)
+                    reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
+                    bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
+                    set_track_user(chat_id,'CHECK_date')
+                    print(Track_user)
+            elif Track_user[chat_id] == 'NEWS':
+                covid_req = {}
+                if text in country.get_flat_states():
+                    covid_req = covid_data_state_dict[text]
+                    covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
+                    bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)   
+                elif text in covid_data_district_dict:
+                    covid_req = covid_data_district_dict[text]
+                    covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
+                    bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
                 print(Track_user)
-        elif Track_user[chat_id] == 'CHECK_dis':
-            if text in country.get_flat_states():
-                bot_text = "Enter the district:"
-                districts = country.get_district(text)
-                reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
-                bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                set_track_user(chat_id,'CHECK_date')
-                print(Track_user)
-        elif Track_user[chat_id] == 'NEWS':
-            covid_req = {}
-            if text in country.get_flat_states():
-                covid_req = covid_data_state_dict[text]
-                covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
-                bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)   
-            elif text in covid_data_district_dict:
-                covid_req = covid_data_district_dict[text]
-                covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
-                bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
-            print(Track_user)
-        elif Track_user[chat_id] == 'CHECK_date':
-            print(text)
-            bot_text = 'Enter  the date:'
-            reply_markup = telegramcalender.create_calendar()
-            update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
-            set_track_user(chat_id,'CHECK,'+text)
-        elif 'CHECK,' in Track_user[chat_id]:
-            print('work', Track_user[chat_id])
-        # try:
-            
+            elif Track_user[chat_id] == 'CHECK_date':
+                print(text)
+                bot_text = 'Enter  the date:'
+                reply_markup = telegramcalender.create_calendar()
+                update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
+                set_track_user(chat_id,'CHECK,'+text)
+            elif 'CHECK,' in Track_user[chat_id]:
+                print('work', Track_user[chat_id])
             
 
 
-        #     # clear the message we got from any non alphabets
-        #     text = re.sub(r"\W", "_", text)
-        #     # create the api link for the avatar based on http://avatars.adorable.io/
-        #     url = "https://api.adorable.io/avatars/285/{}.png".format('good')
-        #     # reply with a photo to the name the user sent,
-        #     # note that you can send photos by url and telegram will fetch it for you
-        #     bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
-        # except Exception:
-        #     # if things went wrong
-        #     bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
+            # clear the message we got from any non alphabets
+            text = re.sub(r"\W", "_", text)
+            # create the api link for the avatar based on http://avatars.adorable.io/
+            url = "https://api.adorable.io/avatars/285/{}.png".format('good')
+            # reply with a photo to the name the user sent,
+            # note that you can send photos by url and telegram will fetch it for you
+            bot.sendPhoto(chat_id=chat_id, photo=url, reply_to_message_id=msg_id)
+        except Exception:
+            # if things went wrong
+            bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
 
     return 'ok'
 
