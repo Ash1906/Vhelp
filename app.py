@@ -67,6 +67,10 @@ def update_user_stat(chat_id,stat):
     except EOFError:
         print('ERROR')
 
+def get_object():
+    with open('stat.txt','rb') as f:
+        status = pickle.load(f)
+        return status
 
 District = []
 
@@ -75,7 +79,7 @@ def respond():
     # retrieve the message in JSON and then transform it to Telegram object
     update = telegram.Update.de_json(request.get_json(force=True), bot)
     callback_query = update.callback_query
-
+    print(get_object())
 
     print(update)
     if callback_query is not None:
@@ -183,7 +187,7 @@ def respond():
 
         ########### user track id #############
         update_user_stat(chat_id,'NEWS')
-
+        print(get_object())
         ########### get covid news district wise ##################
         covid_data_district_dict = {}
         covid_data_district = requests.get(news_district_api)
@@ -204,6 +208,7 @@ def respond():
         #     bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
         
         try:
+            print(get_object())
             print(read_user_stat(chat_id))
             if read_user_stat(chat_id) == 'NEWS_dis':
                 if text in country.get_flat_states():
