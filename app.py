@@ -59,7 +59,7 @@ def respond():
     callback_query = update.callback_query
 
 
-    #print(update)
+    print(update)
     if callback_query is not None:
         if callback_query.data == "state_slot":
             bot_text = "Enter the State name:"
