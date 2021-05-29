@@ -86,13 +86,13 @@ def respond():
             set_track_user(callback_query.message.chat.id,'CHECK_pin')
             return 'ok'
 
-        elif callback_query.data in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
-            selected,date = telegramcalender.process_calendar_selection(bot, update)
-            if selected:
-                bot.send_message(chat_id=callback_query.message.chat.id,
-                                text="You selected %s" % (date.strftime("%d/%m/%Y")),
-                                reply_markup=ReplyKeyboardRemove())
-            return 'ok'
+        # elif callback_query.data in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
+        #     selected,date = telegramcalender.process_calendar_selection(bot, update)
+        #     if selected:
+        #         bot.send_message(chat_id=callback_query.message.chat.id,
+        #                         text="You selected %s" % (date.strftime("%d/%m/%Y")),
+        #                         reply_markup=ReplyKeyboardRemove())
+        #     return 'ok'
 
     if update.message is None:
         return 'BAD Request'
@@ -209,14 +209,14 @@ def respond():
                     covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
                 print(Track_user)
-            elif Track_user[chat_id] == 'CHECK_date':
-                print(text)
-                bot_text = 'Enter  the date:'
-                reply_markup = telegramcalender.create_calendar()
-                update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
-                set_track_user(chat_id,'CHECK,'+text)
-            elif 'CHECK,' in Track_user[chat_id]:
-                print('work', Track_user[chat_id])
+            # elif Track_user[chat_id] == 'CHECK_date':
+            #     print(text)
+            #     bot_text = 'Enter  the date:'
+            #     reply_markup = telegramcalender.create_calendar()
+            #     update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
+            #     set_track_user(chat_id,'CHECK,'+text)
+            # elif 'CHECK,' in Track_user[chat_id]:
+            #     print('work', Track_user[chat_id])
             
 
 
