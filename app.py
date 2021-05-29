@@ -22,7 +22,7 @@ global bot
 global TOKEN
 global news_state_api
 global news_district_api
-
+global Track_user
 
 ### config #########
 TOKEN = parser['Telebot']['token']
@@ -51,15 +51,12 @@ District = []
 
 @app.route('/{}'.format(TOKEN), methods=['POST'])
 def respond():
-    global Track_user
-    global covid_data_state_dict
-    global covid_data_district_dict
     # retrieve the message in JSON and then transform it to Telegram object
     update = telegram.Update.de_json(request.get_json(force=True), bot)
     callback_query = update.callback_query
 
 
-    print(update)
+    #print(update)
     if callback_query is not None:
         if callback_query.data == "state_slot":
             bot_text = "Enter the State name:"
@@ -72,7 +69,6 @@ def respond():
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
             bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
             
-            print(Track_user)
             if Track_user[callback_query.message.chat.id] == 'NEWS':
                 Track_user[callback_query.message.chat.id] = 'NEWS_dis'
             elif Track_user[callback_query.message.chat.id] == 'CHECK':
@@ -135,7 +131,8 @@ def respond():
         bot.sendMessage(chat_id=chat_id, text=bot_news, reply_markup=reply_markup,reply_to_message_id=msg_id)
 
         ################## after sending ###########
-        
+        global covid_data_state_dict
+        global covid_data_district_dict
 
         ########### get covid news state wise ##################
         covid_data_state = requests.get(news_state_api)
