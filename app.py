@@ -11,6 +11,7 @@ import telegram
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup,InlineKeyboardButton
 import requests
 from country import Country
+import telegramcalendar
 
 parser = configparser.ConfigParser()
 parser.read('credentials/config.conf')
@@ -179,7 +180,7 @@ def respond():
                     districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                    set_track_user(chat_id,'CHECK')
+                    set_track_user(chat_id,'CHECK_date')
             elif Track_user[chat_id] == 'NEWS':
                 covid_req = {}
                 if text in country.get_flat_states():
@@ -190,7 +191,11 @@ def respond():
                     covid_req = covid_data_district_dict[text]
                     covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
-            elif Track_user[chat_id] == 'CHECK':
+            elif Track_user[chat_id] == 'CHECK_date':
+                print(text)
+                bot_text = 'Enter  the date:'
+                reply_markup = telegramcalendar.create_calendar()
+                bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
                 pass
             
 
