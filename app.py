@@ -81,14 +81,16 @@ def respond():
             bot_text = "Enter the Pincode name:"
             track_user.set_user(callback_query.message.chat.id,'CHECK_pin')
             return 'ok'
-
-        elif callback_query.data in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
-            selected,date = telegramcalender.process_calendar_selection(bot, update)
-            if selected:
-                bot.send_message(chat_id=callback_query.message.chat.id,
-                                text="You selected %s" % (date.strftime("%d/%m/%Y")),
-                                reply_markup=ReplyKeyboardRemove())
-        #     return 'ok'
+        else:
+            call_back,_,_,_ = track_user.separate_callback_data(callback_query.data)
+            if call_back in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
+                print('all good')
+                selected,date = telegramcalender.process_calendar_selection(bot, update)
+                if selected:
+                    bot.send_message(chat_id=callback_query.message.chat.id,
+                                    text="You selected %s" % (date.strftime("%d/%m/%Y")),
+                                    reply_markup=ReplyKeyboardRemove())
+                return 'ok'
 
     if update.message is None:
         return 'BAD Request'
