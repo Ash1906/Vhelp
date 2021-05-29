@@ -166,17 +166,17 @@ def respond():
             print(Track_user[chat_id])
             if Track_user[chat_id] == 'NEWS_dis':
                 if text in country.get_flat_states():
-                    bot_district = "Enter the district:"
-                    districts = country.get_district(callback_query.data)
+                    bot_text = "Enter the district:"
+                    districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
-                    bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_district, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+                    bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
                     Track_user[chat_id] = 'NEWS'
             elif Track_user[chat_id] == 'CHECK_dis':
                 if text in country.get_flat_states():
-                    bot_district = "Enter the district:"
-                    districts = country.get_district(callback_query.data)
+                    bot_text = "Enter the district:"
+                    districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
-                    bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_district, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+                    bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
                     Track_user[chat_id] = 'CHECK'
             elif Track_user[chat_id] == 'NEWS':
                 covid_req = {}
