@@ -11,7 +11,7 @@ import telegram
 from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup,InlineKeyboardButton
 import requests
 from country import Country
-import telegramcalendar
+import telegramcalender
 
 parser = configparser.ConfigParser()
 parser.read('credentials/config.conf')
