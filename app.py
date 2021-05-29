@@ -84,6 +84,13 @@ def respond():
             bot_text = "Enter the Pincode name:"
             set_track_user(callback_query.message.chat.id,'CHECK_pin')
             return 'ok'
+        elif callback_query.data in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']
+            selected,date = telegramcalender.process_calendar_selection(bot, update)
+            if selected:
+                bot.send_message(chat_id=callback_query.message.chat.id,
+                                text="You selected %s" % (date.strftime("%d/%m/%Y")),
+                                reply_markup=ReplyKeyboardRemove())
+            return 'ok'
 
     if update.message is None:
         return 'BAD Request'
@@ -165,11 +172,11 @@ def respond():
 
         ##### for debuging ############
         print(Track_user)
-        # if Track_user[chat_id] == 'CHECK_date':
-        #     print(text)
-        #     bot_text = 'Enter  the date:'
-        #     reply_markup = telegramcalender.create_calendar()
-        #     bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
+        if Track_user[chat_id] == 'CHECK_date':
+            print(text)
+            bot_text = 'Enter  the date:'
+            reply_markup = telegramcalender.create_calendar()
+            bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
 
         try:
             print(Track_user[chat_id])
@@ -202,6 +209,9 @@ def respond():
                 bot_text = 'Enter  the date:'
                 reply_markup = telegramcalender.create_calendar()
                 bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
+                set_track_user(chat_id,'CHECK,'+text)
+            elif 'CHECK,' in Track_user[chat_id]:
+                print('work', Track_user[chat_id])
             
 
 
