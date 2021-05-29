@@ -49,6 +49,10 @@ app = Flask(__name__)
 District = []
 
 
+def set_track_user(id,text):
+    global Track_user
+    Track_user[id] = text
+
 @app.route('/{}'.format(TOKEN), methods=['POST'])
 def respond():
     # retrieve the message in JSON and then transform it to Telegram object
@@ -70,14 +74,14 @@ def respond():
             bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
             
             if Track_user[callback_query.message.chat.id] == 'NEWS':
-                Track_user[callback_query.message.chat.id] = 'NEWS_dis'
+                set_track_user(callback_query.message.chat.id,'NEWS_dis')
             elif Track_user[callback_query.message.chat.id] == 'CHECK':
-                Track_user[callback_query.message.chat.id] = 'CHECK_dis'
+                set_track_user(callback_query.message.chat.id,'CHECK_dis')
             return 'ok'
             
         elif callback_query.data == "pin_slot":
             bot_text = "Enter the Pincode name:"
-            Track_user[callback_query.message.chat.id] = 'CHECK_pin'
+            set_track_user(callback_query.message.chat.id,'CHECK_pin')
             return 'ok'
 
     if update.message is None:
@@ -119,7 +123,7 @@ def respond():
         bot.sendMessage(chat_id=chat_id, text=bot_check_avail, reply_markup=reply_markup,reply_to_message_id=msg_id)
 
         ########### track user ##########
-        Track_user[chat_id] = 'CHECK'
+        set_track_user(chat_id,'CHECK')
 
 
         ##### news ###############
@@ -144,9 +148,7 @@ def respond():
             covid_data_state_dict[i['state_name']] = i
 
         ########### user track id #############
-        Track_user[chat_id] = 'NEWS'
-        
-
+        set_track_user(chat_id,'NEWS')
 
         ########### get covid news district wise ##################
         covid_data_district_dict = {}
