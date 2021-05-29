@@ -8,7 +8,7 @@ import re
 import configparser
 from flask import Flask, request
 import telegram
-from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup,InlineKeyboardButton
+from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup,InlineKeyboardButton, ReplyKeyboardRemove
 import requests
 from country import Country
 import telegramcalender
