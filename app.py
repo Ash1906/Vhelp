@@ -61,13 +61,13 @@ def respond():
         if callback_query.data == "state_slot":
             bot_text = "Enter the State name:"
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
-            bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_state, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+            bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
             return 'ok'
 
         elif callback_query.data == "dis_slot":
             bot_text = "Enter the District name:"
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
-            bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_state, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
+            bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
             if Track_user[callback_query.message.chat.id] == 'NEWS':
                 Track_user[callback_query.message.chat.id] = 'NEWS_dis'
             elif Track_user[callback_query.message.chat.id] == 'CHECK':
@@ -78,13 +78,6 @@ def respond():
             bot_text = "Enter the Pincode name:"
             Track_user[callback_query.message.chat.id] = 'CHECK_pin'
             return 'ok'
-        else:
-            if callback_query.data in country.get_flat_states():
-                bot_district = "Enter the district:"
-                districts = country.get_district(callback_query.data)
-                reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
-                bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_district, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
-                return 'ok'
 
     if update.message is None:
         return 'BAD Request'
