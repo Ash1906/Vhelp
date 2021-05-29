@@ -68,11 +68,11 @@ def respond():
             return 'ok'
 
         elif callback_query.data == "dis_slot":
-            bot_text = "Enter the District name:"
+            bot_text = "Enter the State name:"
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
             bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
             
-            
+            print(Track_user)
             if Track_user[callback_query.message.chat.id] == 'NEWS':
                 Track_user[callback_query.message.chat.id] = 'NEWS_dis'
             elif Track_user[callback_query.message.chat.id] == 'CHECK':
@@ -162,6 +162,7 @@ def respond():
 
 
     else:
+        print(Track_user)
         try:
             print(Track_user[chat_id])
             if Track_user[chat_id] == 'NEWS_dis':
