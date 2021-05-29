@@ -119,7 +119,7 @@ def respond():
     elif text == "/check_availability":
         bot_check_avail = "HI! Give me Your location"
         keys_inline = []
-        kekeys_inlineys.append([InlineKeyboardButton(text='Pincode',callback_data='pin_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
+        keys_inline.append([InlineKeyboardButton(text='Pincode',callback_data='pin_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
         reply_markup = InlineKeyboardMarkup(keys_inline)
         bot.sendMessage(chat_id=chat_id, text=bot_check_avail, reply_markup=reply_markup,reply_to_message_id=msg_id)
 
