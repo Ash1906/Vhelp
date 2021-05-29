@@ -84,17 +84,17 @@ def respond():
             reply_markup = ReplyKeyboardMarkup(states,resize_keyboard=True,one_time_keyboard=True)
             bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
             if read_user_stat(callback_query.message.chat.id) == 'NEWS':
-                read_user_stat(callback_query.message.chat.id,'NEWS_dis')
+                update_user_stat(callback_query.message.chat.id,'NEWS_dis')
             elif read_user_stat(callback_query.message.chat.id) == 'CHECK':
-                read_user_stat(callback_query.message.chat.id,'CHECK_dis')
+                update_user_stat(callback_query.message.chat.id,'CHECK_dis')
             return 'ok'
             
         elif callback_query.data == "pin_slot":
             bot_text = "Enter the Pincode name:"
-            read_user_stat(callback_query.message.chat.id,'CHECK_pin')
+            update_user_stat(callback_query.message.chat.id,'CHECK_pin')
             return 'ok'
         else:
-            call_back,_,_,_ = track_user.separate_callback_data(callback_query.data)
+            call_back,_,_,_ = telegramcalender.separate_callback_data(callback_query.data)
             if call_back in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
                 print('all good')
                 selected,date = telegramcalender.process_calendar_selection(bot, update)
@@ -151,7 +151,7 @@ def respond():
         bot.sendMessage(chat_id=chat_id, text=bot_check_avail, reply_markup=reply_markup,reply_to_message_id=msg_id)
 
         ########### track user ##########
-        read_user_stat(chat_id,'CHECK')
+        update_user_stat(chat_id,'CHECK')
 
 
         ##### news ###############
@@ -176,7 +176,7 @@ def respond():
             covid_data_state_dict[i['state_name']] = i
 
         ########### user track id #############
-        read_user_stat(chat_id,'NEWS')
+        update_user_stat(chat_id,'NEWS')
 
         ########### get covid news district wise ##################
         covid_data_district_dict = {}
@@ -205,14 +205,14 @@ def respond():
                     districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                    read_user_stat(chat_id,'NEWS')
+                    update_user_stat(chat_id,'NEWS')
             elif read_user_stat(chat_id) == 'CHECK_dis':
                 if text in country.get_flat_states():
                     bot_text = "Enter the district:"
                     districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                    read_user_stat(chat_id,'CHECK_date')
+                    update_user_stat(chat_id,'CHECK_date')
             elif read_user_stat(chat_id) == 'NEWS':
                 covid_req = {}
                 if text in country.get_flat_states():
@@ -224,10 +224,11 @@ def respond():
                     covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
             elif read_user_stat(chat_id) == 'CHECK_date':
+                print(text)
                 bot_text = 'Enter  the date:'
                 reply_markup = telegramcalender.create_calendar()
                 update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
-                read_user_stat(chat_id,'CHECK,'+text)
+                update_user_stat(chat_id,'CHECK,'+text)
             elif 'CHECK,' in read_user_stat(chat_id):
                 print('work', read_user_stat(chat_id))
             
