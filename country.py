@@ -33,7 +33,7 @@ class Track_User:
         else:
             return 'Error'
 
-    def set_user(id,text):
+    def set_user(self,id,text):
         self.track_user[id] = text
 
    
