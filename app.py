@@ -8,7 +8,14 @@ import re
 import configparser
 from flask import Flask, request
 import telegram
-from telegram import ReplyKeyboardMarkup, KeyboardButton,InlineKeyboardMarkup,InlineKeyboardButton, ReplyKeyboardRemove
+from telegram import (
+    ReplyKeyboardMarkup, 
+    KeyboardButton,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton, 
+    ReplyKeyboardRemove, 
+    ChatAction 
+    )
 import requests
 from country import Country
 import telegramcalender
@@ -107,12 +114,14 @@ def respond():
         else:
             call_back,_,_,_ = telegramcalender.separate_callback_data(callback_query.data)
             if call_back in ['IGNORE', 'DAY','PREV-MONTH','NEXT-MONTH']:
-                print('all good')
+             hat   print('all good')
                 selected,date = telegramcalender.process_calendar_selection(bot, update)
                 if selected:
                     bot.send_message(chat_id=callback_query.message.chat.id,
-                                    text="You selected %s" % (date.strftime("%d/%m/%Y")),
+                                    text="You selected %s" % (date.strftime("%d-%m-%Y")),
                                     reply_markup=ReplyKeyboardRemove())
+                    bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
+                    
                 return 'ok'
 
     if update.message is None:
