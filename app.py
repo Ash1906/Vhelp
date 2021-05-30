@@ -201,17 +201,14 @@ def respond():
         keys_inline = []
         keys_inline.append([InlineKeyboardButton(text='State',callback_data='state_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
         reply_markup = InlineKeyboardMarkup(keys_inline)
-        req = requests.get(quote)
-        quo = req.json()
-        myquote = [i['q'] for i in quo if 'q' in i]
-        pr_quo= myquote[0]
+        
         bot.sendMessage(chat_id=chat_id, text=bot_news, reply_markup=reply_markup,reply_to_message_id=msg_id)
-        bot.sendMessage(chat_id=chat_id, text=pr_quo, reply_markup=reply_markup,reply_to_message_id=msg_id)
 
 
         ################## after sending ###########
         global covid_data_state_dict
         global covid_data_district_dict
+        global pr_quo
 
         ########### get covid news state wise ##################
         covid_data_state = requests.get(news_state_api)
@@ -221,6 +218,12 @@ def respond():
             if i['state_name'] == '':
                 i['state_name'] = 'Unknown'
             covid_data_state_dict[i['state_name']] = i
+
+        #########Get quote ###################
+        req = requests.get(quote)
+        quo = req.json()
+        myquote = [i['q'] for i in quo if 'q' in i]
+        pr_quo= myquote[0]
 
         ########### user track id #############
         update_user_stat(chat_id,'NEWS')
@@ -265,10 +268,14 @@ def respond():
                     covid_req = covid_data_state_dict[text]
                     covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)   
+                    bot.sendMessage(chat_id=chat_id, text=pr_quo)
+                    
                 elif text in covid_data_district_dict:
                     covid_req = covid_data_district_dict[text]
                     covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
+                    bot.sendMessage(chat_id=chat_id, text=pr_quo)
+
             elif read_user_stat(chat_id) == 'CHECK_date':
                 bot_text = 'Enter  the date:'
                 reply_markup = telegramcalender.create_calendar()
