@@ -120,8 +120,6 @@ def respond():
                     bot.send_message(chat_id=callback_query.message.chat.id,
                                     text="You selected %s" % (date.strftime("%d-%m-%Y")),
                                     reply_markup=ReplyKeyboardRemove())
-                    bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
-                    
                 return 'ok'
 
     if update.message is None:
