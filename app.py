@@ -43,6 +43,7 @@ news_state_api = parser['Extapi']['news_state']
 news_district_api = parser['Extapi']['news_district']
 slotbyD = parser['Extapi']['slotbyD']
 slotbyP = parser['Extapi']['slotbyP']
+quote = parser['Extapi']['quote']
 
 ## bot init ##########
 bot = telegram.Bot(token=TOKEN)
