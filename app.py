@@ -110,9 +110,9 @@ def send_slot_data(bot,param1,param2,filter,chat_id,msg_id,url):
                 bot.sendMessage(chat_id=chat_id, text=text) 
                 
                 for j in i['sessions']:
-                    text2 = 'Sessions:\ndate: {}\nAge limit: {}\nvaccine: {}\ndose 1: {}\ndose availablity \ndose 2: {}\nslots: {}\n'.format(j['date'],j['min_age_limit'],j['vaccine'],j['available_capacity_dose1'],j['available_capacity_dose2'],'\nslots: '.join(j['slots']))
-                
-                bot.sendMessage(chat_id=chat_id, text=text2) 
+                    if j['available_capacity']>0
+                        text2 = 'Sessions:\ndate: {}\nAge limit: {}\nvaccine: {}\ndose 1: {}\ndose availablity \ndose 2: {}\nslots: {}\n'.format(j['date'],j['min_age_limit'],j['vaccine'],j['available_capacity_dose1'],j['available_capacity_dose2'],'\nslots: '.join(j['slots']))
+                        bot.sendMessage(chat_id=chat_id, text=text2)
 
         else:
             text = 'No sessions found'
