@@ -244,40 +244,37 @@ def respond():
         if text == "/start":
             # print the welcoming message ######################
             bot_welcome = """
-                    I am here to help you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
-                    1. use /start to initialize me 
-                    2. use /news to get an update on current covid news on your area
-                    3. use /bore and I will send you jokes to make you laugh
-                    4. use /check_availability for check availability of slots
-                    5. use /add_subcription for get slot alert
-                    6. use /my_subcriptions to view your subcriptions
-                    7. use /remove_subcription to remove subcription
-                    8. use /help to know how I work
-                    9. use /share to share me with family and friends
-                    10. use /delete_all Delete my data stored
-
-                    Thank you for choosing me. I am glad to help you and others. Share with other people too.
+I am here to help you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
+1. use /start to initialize me 
+2. use /news to get an update on current covid news on your area
+3. use /bore and I will send you jokes to make you laugh
+4. use /check_availability for check availability of slots
+5. use /add_subcription for get slot alert
+6. use /my_subcriptions to view your subcriptions
+7. use /remove_subcription to remove subcription
+8. use /help to know how I work
+9. use /share to share me with family and friends
+10. use /delete_all Delete my data stored
+Thank you for choosing me. I am glad to help you and others. Share with other people too.
             """
             # send the welcoming message
             bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
         elif text == "/help":
             bot_welcome = """  
-            I am a telegram bot who can helpyou find your vaccination slots.
-            I am designed to save your time and efforts you spend on Co-Win. 
-            Vaccination is one way to protect yourself and your family from this deadly virus.
-            I encourage you to get vaccinated as soon as possible 
-            Use me and share with others too.
+I am a telegram bot who can helpyou find your vaccination slots.
+I am designed to save your time and efforts you spend on Co-Win. 
+Vaccination is one way to protect yourself and your family from this deadly virus.
+I encourage you to get vaccinated as soon as possible 
+Use me and share with others too.
+Here is the list of commands you can use :
 
-            Here is the list of commands you can use :
-
-                    1. use /start to initialize me 
-                    2. use /news to get an update on current covid news on your area
-                    3. use /bore and I will send you jokes to make you laugh
-                    4. use /check_availability for check availability of slots
-                    5. use /help to know how I work
-                    6. use /share to share me with family and friends
-
-                    Thank you for choosing me. I am glad to help you and others. Share with other people too.
+1. use /start to initialize me 
+2. use /news to get an update on current covid news on your area
+3. use /bore and I will send you jokes to make you laugh
+4. use /check_availability for check availability of slots
+5. use /help to know how I work
+6. use /share to share me with family and friends
+Thank you for choosing me. I am glad to help you and others. Share with other people too.
             """
             # send the welcoming message
             bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
