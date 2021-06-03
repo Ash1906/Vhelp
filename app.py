@@ -22,6 +22,28 @@ from country import Country
 import telegramcalender
 import pickle
 import time
+import sqlalchemy
+from apscheduler.schedulers.background import BackgroundScheduler
+
+
+scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
+
+# scheduler.add_jobstore('sqlalchemy', url='sqlite:////tmp/schedule.db')
+
+
+
+
+
+@scheduler.scheduled_job('interval', minutes=3)
+def timed_job():
+    print('This job is run every three minutes.')
+
+@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=6)
+def scheduled_job():
+    print('This job is run every weekday at 5pm.')
+
+
+scheduler.start()
 
 parser = configparser.ConfigParser()
 parser.read('credentials/config.conf')
@@ -62,27 +84,46 @@ pr_quo_list = []
 app = Flask(__name__)
 
 
-def read_user_stat(chat_id):
+def update_user(chat_id,param,data):
     try:
-        with open('stat.txt','rb') as f:
-            status = pickle.load(f)
-            if chat_id in status:
-                return status[chat_id]
+        User = []
+        with open('user_stat.txt','rb') as f:
+            User = pickle.load(f)
+            if chat_id not in User:
+                User[chat_id] = {}
+                User[chat_id][param] = data
             else:
-                'Error'
+                User[chat_id][param] = data
+        with open('user_stat.txt','wb') as f:
+            pickle.dump(User,f,protocol=pickle.HIGHEST_PROTOCOL)
     except EOFError:
         print('ERROR')
 
-def update_user_stat(chat_id,stat):
+
+def read_user(chat_id,param):
     try:
-        status = []
-        with open('stat.txt','rb') as f:
-            status = pickle.load(f)
-            status[chat_id] = stat
-        with open('stat.txt','wb') as f:
-            pickle.dump(status,f,protocol=pickle.HIGHEST_PROTOCOL)
+        with open('user_stat.txt','rb') as f:
+            User = pickle.load(f)
+            if chat_id in User:
+                if param in User[chat_id]:
+                    return User[chat_id][param]
+            
+        return False
     except EOFError:
         print('ERROR')
+
+def remove_user(chat_id):
+    try:
+        User = []
+        with open('user_stat.txt','rb') as f:
+            User = pickle.load(f)
+            if chat_id  in User:
+                del User[chat_id]
+        with open('user_stat.txt','wb') as f:
+            pickle.dump(User,f,protocol=pickle.HIGHEST_PROTOCOL)
+    except EOFError:
+        print('ERROR')
+
 
 # def get_object():
 #     with open('stat.txt','rb') as f:
@@ -98,11 +139,12 @@ def send_slot_data(bot,param1,param2,filter,chat_id,msg_id,url):
     print(req.url)
     data = data.json()
     # print(data)
+    count = 0
     text = 'No sessions found for this date!'
     if 'centers' in data:
         print('good')
         if len(data['centers'])>0:
-
+            
             for i in data['centers']:
                 try:
                     # print(i)
@@ -113,15 +155,11 @@ def send_slot_data(bot,param1,param2,filter,chat_id,msg_id,url):
                         for j in i['sessions']:
                             text2 = 'Sessions:\ndate: {}\nAge limit: {}\nvaccine: {}\ndose 1: {}\ndose availablity \ndose 2: {}\nslots: {}\n'.format(j['date'],j['min_age_limit'],j['vaccine'],j['available_capacity_dose1'],j['available_capacity_dose2'],'\nslots: '.join(j['slots']))
                             bot.sendMessage(chat_id=chat_id, text=text2)
+                            count+=1
                 except StopIteration:
-                    text = 'No sessions found at center {}'.format(i['name'])
-                    bot.sendMessage(chat_id=chat_id, text=text, reply_to_message_id=msg_id)
-                    
-        else:
-            text = 'No sessions found'
-            bot.sendMessage(chat_id=chat_id, text=text, reply_to_message_id=msg_id)
-    else:
-        bot.sendMessage(chat_id=chat_id, text=text, reply_to_message_id=msg_id)
+                    print('No sessions found at center {}'.format(i['name']))
+
+    return count
 
 District = []
 
@@ -143,18 +181,23 @@ def respond():
                 bot_text = "Enter the State name:"
                 reply_markup = ReplyKeyboardMarkup(check_states,resize_keyboard=True,one_time_keyboard=True)
                 bot.sendMessage(chat_id=callback_query.message.chat.id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=callback_query.message.message_id)
-                if read_user_stat(callback_query.message.chat.id) == 'NEWS':
-                    update_user_stat(callback_query.message.chat.id,'NEWS_dis')
-                elif read_user_stat(callback_query.message.chat.id) == 'CHECK':
-                    update_user_stat(callback_query.message.chat.id,'CHECK_dis')
+                if read_user(callback_query.message.chat.id,'status') == 'NEWS':
+                    update_user(callback_query.message.chat.id,'status','NEWS_dis')
+                elif read_user(callback_query.message.chat.id,'status') == 'CHECK':
+                    update_user(callback_query.message.chat.id,'status','CHECK_dis')
+                elif read_user(callback_query.message.chat.id,'status') == 'SUBSCRIBE':
+                    update_user(callback_query.message.chat.id,'status','SUBSCRIBE_dis')
                 return 'ok'
                 
             elif callback_query.data == "pin_slot":
                 bot_text = "Enter the Pincode name:"
-                bot.sendMessage(chat_id=callback_query.message.chat.id, text=bot_text) 
-                update_user_stat(callback_query.message.chat.id,'CHECK_pin')
+                bot.sendMessage(chat_id=callback_query.message.chat.id, text=bot_text)
+                if read_user(callback_query.message.chat.id,'status') == 'CHECK':
+                    update_user(callback_query.message.chat.id,'status','CHECK_pin')
+                elif read_user(callback_query.message.chat.id,'status') == 'SUBSCRIBE':
+                    update_user(callback_query.message.chat.id,'status','SUBSCRIBE_add_pin')
                 return 'ok'
-            elif 'CHECK,' in read_user_stat(callback_query.message.chat.id) or 'CHECKPIN,' in read_user_stat(callback_query.message.chat.id):
+            elif 'CHECK,' in read_user(callback_query.message.chat.id,'status') or 'CHECKPIN,' in read_user_stat(callback_query.message.chat.id):
                 try: 
                     call_back,_,_,_ = telegramcalender.separate_callback_data(callback_query.data)
                 except Exception:
@@ -167,15 +210,20 @@ def respond():
                                         text="You selected %s" % (date.strftime("%d-%m-%Y")),
                                         reply_markup=ReplyKeyboardRemove())
                         bot.send_chat_action(chat_id=callback_query.message.chat.id, action=ChatAction.TYPING)
-                        if 'CHECK,' in read_user_stat(callback_query.message.chat.id):
-                            _,district = read_user_stat(callback_query.message.chat.id).split(',')
+                        if 'CHECK,' in read_user(callback_query.message.chat.id,'status'):
+                            _,district = read_user(callback_query.message.chat.id,'status').split(',')
                             id = country.get_district_id(district)
                             print(id,date.strftime("%d-%m-%Y"))
-                            send_slot_data(bot,id,date.strftime("%d-%m-%Y"),'district_id',callback_query.message.chat.id,callback_query.message.message_id,slotbyD)
-                        elif 'CHECKPIN,' in read_user_stat(callback_query.message.chat.id):
-                            _,pincode = read_user_stat(callback_query.message.chat.id).split(',')
-                            send_slot_data(bot,pincode,date.strftime("%d-%m-%Y"),'pincode',callback_query.message.chat.id,callback_query.message.message_id,slotbyP)
-                        update_user_stat(callback_query.message.chat.id,'DONE')
+                            ret = send_slot_data(bot,id,date.strftime("%d-%m-%Y"),'district_id',callback_query.message.chat.id,callback_query.message.message_id,slotbyD)
+                            if ret == 0:
+                                bot.sendMessage(chat_id=callback_query.message.chat.id, text='No sessions found for this date!')
+
+                        elif 'CHECKPIN,' in read_user(callback_query.message.chat.id,'status'):
+                            _,pincode = read_user(callback_query.message.chat.id,'status').split(',')
+                            ret = send_slot_data(bot,pincode,date.strftime("%d-%m-%Y"),'pincode',callback_query.message.chat.id,callback_query.message.message_id,slotbyP)
+                            if ret == 0:
+                                bot.sendMessage(chat_id=callback_query.message.chat.id, text='No sessions found for this date!')
+                        update_user(callback_query.message.chat.id,'status','DONE')
                         return 'ok'
 
         if update.message is None:
@@ -201,8 +249,12 @@ def respond():
                     2. use /news to get an update on current covid news on your area
                     3. use /bore and I will send you jokes to make you laugh
                     4. use /check_availability for check availability of slots
-                    5. use /help to know how I work
-                    6. use /share to share me with family and friends
+                    5. use /add_subcription for get slot alert
+                    6. use /my_subcriptions to view your subcriptions
+                    7. use /remove_subcription to remove subcription
+                    8. use /help to know how I work
+                    9. use /share to share me with family and friends
+                    10. use /delete_all Delete my data stored
 
                     Thank you for choosing me. I am glad to help you and others. Share with other people too.
             """
@@ -246,10 +298,46 @@ def respond():
             bot.sendMessage(chat_id=chat_id, text=bot_check_avail, reply_markup=reply_markup,reply_to_message_id=msg_id)
 
             ########### track user ##########
-            update_user_stat(chat_id,'CHECK')
+            update_user(chat_id,'status','CHECK')
 
 
             ##### news ###############
+        elif text == "/delete_all":
+            pass
+        elif text == "/remove_subcription":
+            subscrib  = read_user(chat_id,'Subcriptions')
+            if subscrib:
+                bot_text = 'Select the region you want to remove:'
+                key_buttons = subscrib['dis'] + subscrib['pin']
+                reply_markup = ReplyKeyboardMarkup([key_buttons],resize_keyboard=True,one_time_keyboard=True)
+                bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
+                update_user(chat_id,'status','SUBSCRIBE_rem')
+            else:
+                bot_text = 'You have no subcriptions!'
+                bot.sendMessage(chat_id=chat_id, text=bot_text, reply_to_message_id=msg_id)
+
+
+        elif text == "/my_subcriptions":
+            subscrib  = read_user(chat_id,'Subcriptions')
+            bot_text = ''
+            if subscrib:
+                print(subscrib)
+                bot_text = 'Here are Your Subcriptions:\n'
+                bot_text += '{}\n{}'.format('\n'.join(subscrib['dis']),'\n'.join(subscrib['pin']))
+            else:
+                bot_text = 'You have no subcriptions!'
+            bot.sendMessage(chat_id=chat_id, text=bot_text, reply_to_message_id=msg_id)
+
+        elif text == "/add_subcription":
+            bot_subscribe = "HI! Let's Subscribe Your region:" 
+
+            keys_inline = []
+            keys_inline.append([InlineKeyboardButton(text='Pincode',callback_data='pin_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
+            reply_markup = InlineKeyboardMarkup(keys_inline)
+            bot.sendMessage(chat_id=chat_id, text=bot_subscribe, reply_markup=reply_markup,reply_to_message_id=msg_id)
+
+            update_user(chat_id,'status','SUBSCRIBE')
+
         elif text == "/news":
             bot_news = "For which region you want data?"
             keys_inline = []
@@ -279,7 +367,7 @@ def respond():
             
 
             ########### user track id #############
-            update_user_stat(chat_id,'NEWS')
+            update_user(chat_id,'status','NEWS')
             ########### get covid news district wise ##################
             covid_data_district_dict = {}
             covid_data_district = requests.get(news_district_api)
@@ -298,22 +386,29 @@ def respond():
             #     bot_text = 'Enter  the date:'
             #     reply_markup = telegramcalender.create_calendar()
             #     bot.sendMessage(chat_id=chat_id, text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-            print(read_user_stat(chat_id))
-            if read_user_stat(chat_id) == 'NEWS_dis':
+            print(read_user(chat_id,'status'))
+            if read_user(chat_id,'status') == 'NEWS_dis':
                 if text in country.get_flat_states():
                     bot_text = "Enter the district:"
                     districts = country.get_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                    update_user_stat(chat_id,'NEWS')
-            elif read_user_stat(chat_id) == 'CHECK_dis':
+                    update_user(chat_id,'status','NEWS')
+            elif read_user(chat_id,'status') == 'CHECK_dis':
                 if text in country.get_flat_check_states():
                     bot_text = "Enter the district:"
                     districts = country.get_check_district(text)
                     reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
                     bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
-                    update_user_stat(chat_id,'CHECK_date')
-            elif read_user_stat(chat_id) == 'NEWS':
+                    update_user(chat_id,'status','CHECK_date')
+            elif read_user(chat_id,'status') == 'SUBSCRIBE_dis':
+                if text in country.get_flat_check_states():
+                    bot_text = "Enter the district:"
+                    districts = country.get_check_district(text)
+                    reply_markup = ReplyKeyboardMarkup(districts,resize_keyboard=True,one_time_keyboard=True)
+                    bot.sendMessage(chat_id=chat_id,text=bot_text, reply_markup=reply_markup, reply_to_message_id=msg_id)
+                    update_user(chat_id,'status','SUBSCRIBE_add_dis')
+            elif read_user(chat_id,'status') == 'NEWS':
                 covid_req = {}
                 if text in country.get_flat_states():
                     covid_req = covid_data_state_dict[text]
@@ -328,17 +423,52 @@ def respond():
                     pr_quo= pr_quo_list[0]
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
                     bot.sendMessage(chat_id=chat_id, text=pr_quo)
-                update_user_stat(chat_id,'DONE')
-            elif read_user_stat(chat_id) == 'CHECK_date':
+                update_user(chat_id,'status','DONE')
+            elif read_user(chat_id,'status') == 'CHECK_date':
                 bot_text = 'Enter  the date:'
                 reply_markup = telegramcalender.create_calendar()
                 update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
-                update_user_stat(chat_id,'CHECK,'+text)
-            elif read_user_stat(chat_id) == 'CHECK_pin':
+                update_user(chat_id,'status','CHECK,'+text)
+            elif read_user(chat_id,'status') == 'CHECK_pin':
                 bot_text = 'Enter  the pincode:'
                 reply_markup = telegramcalender.create_calendar()
                 update.message.reply_text("Please select a date: ", reply_markup=telegramcalender.create_calendar())
-                update_user_stat(chat_id,'CHECKPIN,'+text)
+                update_user(chat_id,'status','CHECKPIN,'+text)
+            elif read_user(chat_id,'status') == 'SUBSCRIBE_add_dis':
+                subscrib  = read_user(chat_id,'Subcriptions')
+                if subscrib:
+                    if text not in subscrib['dis']:
+                        subscrib['dis'].append(text)
+                else:
+                    subscrib = {'dis':[],'pin':[]}
+                    subscrib['dis'].append(text)
+                update_user(chat_id,'Subcriptions',subscrib)
+                update_user(chat_id,'status','DONE')
+            elif read_user(chat_id,'status') == 'SUBSCRIBE_add_pin':
+                subscrib  = read_user(chat_id,'Subcriptions')
+                if subscrib:
+                    if text not in subscrib['pin']:
+                        subscrib['pin'].append(text)
+                else:
+                    subscrib = {'dis':[],'pin':[]}
+                    subscrib['pin'].append(text)
+                update_user(chat_id,'Subcriptions',subscrib)
+                update_user(chat_id,'status','DONE')
+            elif read_user(chat_id,'status') ==  'SUBSCRIBE_rem':
+                subscrib  = read_user(chat_id,'Subcriptions')
+                if subscrib:
+                    if text in subscrib['pin']:
+                        subscrib['pin'].remove(text)
+                    elif text in subscrib['dis']:
+                        subscrib['dis'].remove(text)
+                update_user(chat_id,'Subcriptions',subscrib)
+                update_user(chat_id,'status','DONE')
+
+
+
+
+
+
 
     except Exception as e:
         # if things went wrong
