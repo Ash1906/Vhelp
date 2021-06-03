@@ -150,7 +150,7 @@ def send_slot_data(bot,param1,param2,filter,chat_id,msg_id,url):
                     # print(i)
                     if next(item for item in i['sessions'] if item["available_capacity"]>0):
                         print('working')
-                        text = 'Here are the slots we find for you!\nFor state {} in district {} :\nCenter name : {}\nAddress : {}\nFee Type : {}\n'.format(i['state_name'],i['district_name'],i['name'],i['address'],i['fee_type'])
+                        text = 'Here are the slots we found for you!\nFor state {} in district {} :\nCenter name : {}\nAddress : {}\nFee Type : {}\n'.format(i['state_name'],i['district_name'],i['name'],i['address'],i['fee_type'])
                         bot.sendMessage(chat_id=chat_id, text=text)
                         for j in i['sessions']:
                             text2 = 'Sessions:\ndate: {}\nAge limit: {}\nvaccine: {}\ndose 1: {}\ndose availablity \ndose 2: {}\nslots: {}\n'.format(j['date'],j['min_age_limit'],j['vaccine'],j['available_capacity_dose1'],j['available_capacity_dose2'],'\nslots: '.join(j['slots']))
@@ -245,6 +245,7 @@ def respond():
             # print the welcoming message ######################
             bot_welcome = """
 I am here to help you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
+
 1. use /start to initialize me 
 2. use /news to get an update on current covid news on your area
 3. use /bore and I will send you jokes to make you laugh
@@ -255,6 +256,7 @@ I am here to help you find your slot to get Vaccinated, I will also update you o
 8. use /help to know how I work
 9. use /share to share me with family and friends
 10. use /delete_all Delete my data stored
+
 Thank you for choosing me. I am glad to help you and others. Share with other people too.
             """
             # send the welcoming message
@@ -274,6 +276,7 @@ Here is the list of commands you can use :
 4. use /check_availability for check availability of slots
 5. use /help to know how I work
 6. use /share to share me with family and friends
+
 Thank you for choosing me. I am glad to help you and others. Share with other people too.
             """
             # send the welcoming message
@@ -286,9 +289,20 @@ Thank you for choosing me. I am glad to help you and others. Share with other pe
             punch = joke['setup'] +" " +  joke['punchline']
             bot.sendMessage(chat_id=chat_id, text=punch, reply_to_message_id=msg_id)
 
+        ###########share####################
+
+        elif text=="/share":
+            link = """
+Getting vaccination is first step to win over this covid-war. 
+Join me to get slots info, news and more here.  
+https://t.me/VaccinationslotBot
+please share with your family and friends!
+            """
+            bot.sendMessage(chat_id=chat_id, text=link, reply_to_message_id=msg_id)
+
             ### /check availability #########################
         elif text == "/check_availability":
-            bot_check_avail = "HI! Give me Your location"
+            bot_check_avail = "Hi! Tell me your location"
             keys_inline = []
             keys_inline.append([InlineKeyboardButton(text='Pincode',callback_data='pin_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
             reply_markup = InlineKeyboardMarkup(keys_inline)
@@ -319,14 +333,14 @@ Thank you for choosing me. I am glad to help you and others. Share with other pe
             bot_text = ''
             if subscrib:
                 print(subscrib)
-                bot_text = 'Here are Your Subcriptions:\n'
+                bot_text = 'These are your subcriptions:\n'
                 bot_text += '{}\n{}'.format('\n'.join(subscrib['dis']),'\n'.join(subscrib['pin']))
             else:
-                bot_text = 'You have no subcriptions!'
+                bot_text = 'You have no subcription!'
             bot.sendMessage(chat_id=chat_id, text=bot_text, reply_to_message_id=msg_id)
 
         elif text == "/add_subcription":
-            bot_subscribe = "HI! Let's Subscribe Your region:" 
+            bot_subscribe = "Hi! Let's subscribe your home:" 
 
             keys_inline = []
             keys_inline.append([InlineKeyboardButton(text='Pincode',callback_data='pin_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
@@ -336,7 +350,7 @@ Thank you for choosing me. I am glad to help you and others. Share with other pe
             update_user(chat_id,'status','SUBSCRIBE')
 
         elif text == "/news":
-            bot_news = "For which region you want data?"
+            bot_news = "Tell me the place for which you want news!"
             keys_inline = []
             keys_inline.append([InlineKeyboardButton(text='State',callback_data='state_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
             reply_markup = InlineKeyboardMarkup(keys_inline)
@@ -409,14 +423,14 @@ Thank you for choosing me. I am glad to help you and others. Share with other pe
                 covid_req = {}
                 if text in country.get_flat_states():
                     covid_req = covid_data_state_dict[text]
-                    covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
+                    covid_text = 'Hey! There are {} no. of active cases and {} people recovered from coronavirus in {} state. And only {} no. of deaths reported due to covid. So, Don\'t worry. \nTotal confirmed cases are {}.\nStay home Stay safe!'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
                     pr_quo= pr_quo_list[0]
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)   
                     bot.sendMessage(chat_id=chat_id, text=pr_quo)
                     
                 elif text in covid_data_district_dict:
                     covid_req = covid_data_district_dict[text]
-                    covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
+                    covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths reported due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                     pr_quo= pr_quo_list[0]
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
                     bot.sendMessage(chat_id=chat_id, text=pr_quo)
