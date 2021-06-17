@@ -24,7 +24,7 @@ import pickle
 import time
 import sqlalchemy
 from apscheduler.schedulers.background import BackgroundScheduler
-
+from datetime import datetime,timedelta
 
 scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
@@ -34,16 +34,7 @@ scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
 
 
-@scheduler.scheduled_job('interval', minutes=3)
-def timed_job():
-    print('This job is run every three minutes.')
 
-@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=6)
-def scheduled_job():
-    print('This job is run every weekday at 5pm.')
-
-
-scheduler.start()
 
 parser = configparser.ConfigParser()
 parser.read('credentials/config.conf')
@@ -79,6 +70,68 @@ check_states = country.get_check_states()
 covid_data_state_dict = {}
 covid_data_district_dict = {}
 pr_quo_list = []
+
+
+@scheduler.scheduled_job('interval', minutes=30)
+def timed_job():
+    print('This job is run every thirty minutes.')
+    subs_rem = {}
+    with open('user_stat.txt','rb') as f:
+        User = pickle.load(f)
+        print(User)
+        
+        for chat_id in User:
+            if 'Subcriptions' in User[chat_id]:
+                subscrib = User[chat_id]['Subcriptions']
+                subs_rem[chat_id] = []
+                if subscrib:
+                    if len(subscrib['pin'])>0:
+                        for i in subscrib['pin']:
+                            date = datetime.today()
+                            print(i,date,chat_id)
+                            for c in range(3):
+                                ret = send_slot_data(bot,i,date.strftime("%d-%m-%Y"),'pincode',chat_id,'msg_id',slotbyP)
+                                print(i,date,chat_id,ret)
+                                if ret>0:
+                                    subs_rem[chat_id].append(i)
+                                    bot.sendMessage(chat_id=callback_query.message.chat.id, text='No sessions found for this date!')
+                                    break
+                                date +=timedelta(1)
+                            
+                    if len(subscrib['dis'])>0:
+                        for i in subscrib['dis']:
+                            date = datetime.today()
+                            id = country.get_district_id(i)
+                            print(date,id,i,chat_id)
+                            for c in range(3):
+                                ret = send_slot_data(bot,id,date.strftime("%d-%m-%Y"),'district_id',chat_id,'msg_id',slotbyD)
+                                print(date,id,i,chat_id)
+                                if ret>0:
+                                    subs_rem[chat_id].append(i)
+                                    break
+                                date +=timedelta(1)
+        
+    for chat_id in subs_rem:
+        subscrib  = read_user(chat_id,'Subcriptions')
+        if subscrib:
+            for text in subs_rem[chat_id]:
+                if text in subscrib['pin']:
+                    subscrib['pin'].remove(text)
+                    bot_text = 'We removed the subscription: '+text
+                    bot.sendMessage(chat_id=chat_id, text=bot_text)
+                elif text in subscrib['dis']:
+                    subscrib['dis'].remove(text)
+                    bot_text = 'We removed the subscription: '+text
+                    bot.sendMessage(chat_id=chat_id, text=bot_text)
+        update_user(chat_id,'Subcriptions',subscrib)
+
+
+@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=6)
+def scheduled_job():
+    print('This job is run every weekday at 5pm.')
+
+
+scheduler.start()
 
 
 app = Flask(__name__)
@@ -153,10 +206,11 @@ def send_slot_data(bot,param1,param2,filter,chat_id,msg_id,url):
                         text = 'Here are the slots we found for you!\nFor state {} in district {} :\nCenter name : {}\nAddress : {}\nFee Type : {}\n'.format(i['state_name'],i['district_name'],i['name'],i['address'],i['fee_type'])
                         bot.sendMessage(chat_id=chat_id, text=text)
                         for j in i['sessions']:
-                            text2 = 'Sessions:\ndate: {}\nAge limit: {}\nvaccine: {}\ndose 1: {}\ndose availablity \ndose 2: {}\nslots: {}\n'.format(j['date'],j['min_age_limit'],j['vaccine'],j['available_capacity_dose1'],j['available_capacity_dose2'],'\nslots: '.join(j['slots']))
-                            bot.sendMessage(chat_id=chat_id, text=text2)
-                            count+=1
-                except StopIteration:
+                            if j['available_capacity']>0:
+                                text2 = 'Sessions:\ndate: {}\nAge limit: {}\nvaccine: {}\ndose 1: {}\ndose availablity \ndose 2: {}\nslots: {}\n'.format(j['date'],j['min_age_limit'],j['vaccine'],j['available_capacity_dose1'],j['available_capacity_dose2'],'\nslots: '.join(j['slots']))
+                                bot.sendMessage(chat_id=chat_id, text=text2)
+                                count+=1
+                except:
                     print('No sessions found at center {}'.format(i['name']))
 
     return count
@@ -213,7 +267,6 @@ def respond():
                         if 'CHECK,' in read_user(callback_query.message.chat.id,'status'):
                             _,district = read_user(callback_query.message.chat.id,'status').split(',')
                             id = country.get_district_id(district)
-                            print(id,date.strftime("%d-%m-%Y"))
                             ret = send_slot_data(bot,id,date.strftime("%d-%m-%Y"),'district_id',callback_query.message.chat.id,callback_query.message.message_id,slotbyD)
                             if ret == 0:
                                 bot.sendMessage(chat_id=callback_query.message.chat.id, text='No sessions found for this date!')
@@ -484,7 +537,6 @@ please share with your family and friends!
     except Exception as e:
         # if things went wrong
         print('error',e)
-        bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
 
     return 'ok'
 
