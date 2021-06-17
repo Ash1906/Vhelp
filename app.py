@@ -24,7 +24,7 @@ import pickle
 import time
 import sqlalchemy
 from apscheduler.schedulers.background import BackgroundScheduler
-
+from datetime import datetime,timedelta
 
 scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
@@ -34,16 +34,7 @@ scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
 
 
-@scheduler.scheduled_job('interval', minutes=3)
-def timed_job():
-    print('This job is run every three minutes.')
 
-@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=6)
-def scheduled_job():
-    print('This job is run every weekday at 5pm.')
-
-
-scheduler.start()
 
 parser = configparser.ConfigParser()
 parser.read('credentials/config.conf')
@@ -79,6 +70,68 @@ check_states = country.get_check_states()
 covid_data_state_dict = {}
 covid_data_district_dict = {}
 pr_quo_list = []
+
+
+@scheduler.scheduled_job('interval', minutes=30)
+def timed_job():
+    print('This job is run every thirty minutes.')
+    subs_rem = {}
+    with open('user_stat.txt','rb') as f:
+        User = pickle.load(f)
+        print(User)
+        
+        for chat_id in User:
+            if 'Subcriptions' in User[chat_id]:
+                subscrib = User[chat_id]['Subcriptions']
+                subs_rem[chat_id] = []
+                if subscrib:
+                    if len(subscrib['pin'])>0:
+                        for i in subscrib['pin']:
+                            date = datetime.today()
+                            print(i,date,chat_id)
+                            for c in range(3):
+                                ret = send_slot_data(bot,i,date.strftime("%d-%m-%Y"),'pincode',chat_id,'msg_id',slotbyP)
+                                print(i,date,chat_id,ret)
+                                if ret>0:
+                                    subs_rem[chat_id].append(i)
+                                    bot.sendMessage(chat_id=callback_query.message.chat.id, text='No sessions found for this date!')
+                                    break
+                                date +=timedelta(1)
+                            
+                    if len(subscrib['dis'])>0:
+                        for i in subscrib['dis']:
+                            date = datetime.today()
+                            id = country.get_district_id(i)
+                            print(date,id,i,chat_id)
+                            for c in range(3):
+                                ret = send_slot_data(bot,id,date.strftime("%d-%m-%Y"),'district_id',chat_id,'msg_id',slotbyD)
+                                print(date,id,i,chat_id)
+                                if ret>0:
+                                    subs_rem[chat_id].append(i)
+                                    break
+                                date +=timedelta(1)
+        
+    for chat_id in subs_rem:
+        subscrib  = read_user(chat_id,'Subcriptions')
+        if subscrib:
+            for text in subs_rem[chat_id]:
+                if text in subscrib['pin']:
+                    subscrib['pin'].remove(text)
+                    bot_text = 'We removed the subscription: '+text
+                    bot.sendMessage(chat_id=chat_id, text=bot_text)
+                elif text in subscrib['dis']:
+                    subscrib['dis'].remove(text)
+                    bot_text = 'We removed the subscription: '+text
+                    bot.sendMessage(chat_id=chat_id, text=bot_text)
+        update_user(chat_id,'Subcriptions',subscrib)
+
+
+@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=6)
+def scheduled_job():
+    print('This job is run every weekday at 5pm.')
+
+
+scheduler.start()
 
 
 app = Flask(__name__)
@@ -150,13 +203,14 @@ def send_slot_data(bot,param1,param2,filter,chat_id,msg_id,url):
                     # print(i)
                     if next(item for item in i['sessions'] if item["available_capacity"]>0):
                         print('working')
-                        text = 'Here are the slots we find for you!\nFor state {} in district {} :\nCenter name : {}\nAddress : {}\nFee Type : {}\n'.format(i['state_name'],i['district_name'],i['name'],i['address'],i['fee_type'])
+                        text = 'Here are the slots we found for you!\nFor state {} in district {} :\nCenter name : {}\nAddress : {}\nFee Type : {}\n'.format(i['state_name'],i['district_name'],i['name'],i['address'],i['fee_type'])
                         bot.sendMessage(chat_id=chat_id, text=text)
                         for j in i['sessions']:
-                            text2 = 'Sessions:\ndate: {}\nAge limit: {}\nvaccine: {}\ndose 1: {}\ndose availablity \ndose 2: {}\nslots: {}\n'.format(j['date'],j['min_age_limit'],j['vaccine'],j['available_capacity_dose1'],j['available_capacity_dose2'],'\nslots: '.join(j['slots']))
-                            bot.sendMessage(chat_id=chat_id, text=text2)
-                            count+=1
-                except StopIteration:
+                            if j['available_capacity']>0:
+                                text2 = 'Sessions:\ndate: {}\nAge limit: {}\nvaccine: {}\ndose 1: {}\ndose availablity \ndose 2: {}\nslots: {}\n'.format(j['date'],j['min_age_limit'],j['vaccine'],j['available_capacity_dose1'],j['available_capacity_dose2'],'\nslots: '.join(j['slots']))
+                                bot.sendMessage(chat_id=chat_id, text=text2)
+                                count+=1
+                except:
                     print('No sessions found at center {}'.format(i['name']))
 
     return count
@@ -213,7 +267,6 @@ def respond():
                         if 'CHECK,' in read_user(callback_query.message.chat.id,'status'):
                             _,district = read_user(callback_query.message.chat.id,'status').split(',')
                             id = country.get_district_id(district)
-                            print(id,date.strftime("%d-%m-%Y"))
                             ret = send_slot_data(bot,id,date.strftime("%d-%m-%Y"),'district_id',callback_query.message.chat.id,callback_query.message.message_id,slotbyD)
                             if ret == 0:
                                 bot.sendMessage(chat_id=callback_query.message.chat.id, text='No sessions found for this date!')
@@ -244,40 +297,40 @@ def respond():
         if text == "/start":
             # print the welcoming message ######################
             bot_welcome = """
-                    I am here to help you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
-                    1. use /start to initialize me 
-                    2. use /news to get an update on current covid news on your area
-                    3. use /bore and I will send you jokes to make you laugh
-                    4. use /check_availability for check availability of slots
-                    5. use /add_subcription for get slot alert
-                    6. use /my_subcriptions to view your subcriptions
-                    7. use /remove_subcription to remove subcription
-                    8. use /help to know how I work
-                    9. use /share to share me with family and friends
-                    10. use /delete_all Delete my data stored
+I am here to help you find your slot to get Vaccinated, I will also update you on the rising cases in your area!
 
-                    Thank you for choosing me. I am glad to help you and others. Share with other people too.
+1. use /start to initialize me 
+2. use /news to get an update on current covid news on your area
+3. use /bore and I will send you jokes to make you laugh
+4. use /check_availability for check availability of slots
+5. use /add_subcription for get slot alert
+6. use /my_subcriptions to view your subcriptions
+7. use /remove_subcription to remove subcription
+8. use /help to know how I work
+9. use /share to share me with family and friends
+10. use /delete_all Delete my data stored
+
+Thank you for choosing me. I am glad to help you and others. Share with other people too.
             """
             # send the welcoming message
             bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
         elif text == "/help":
             bot_welcome = """  
-            I am a telegram bot who can helpyou find your vaccination slots.
-            I am designed to save your time and efforts you spend on Co-Win. 
-            Vaccination is one way to protect yourself and your family from this deadly virus.
-            I encourage you to get vaccinated as soon as possible 
-            Use me and share with others too.
+I am a telegram bot who can helpyou find your vaccination slots.
+I am designed to save your time and efforts you spend on Co-Win. 
+Vaccination is one way to protect yourself and your family from this deadly virus.
+I encourage you to get vaccinated as soon as possible 
+Use me and share with others too.
+Here is the list of commands you can use :
 
-            Here is the list of commands you can use :
+1. use /start to initialize me 
+2. use /news to get an update on current covid news on your area
+3. use /bore and I will send you jokes to make you laugh
+4. use /check_availability for check availability of slots
+5. use /help to know how I work
+6. use /share to share me with family and friends
 
-                    1. use /start to initialize me 
-                    2. use /news to get an update on current covid news on your area
-                    3. use /bore and I will send you jokes to make you laugh
-                    4. use /check_availability for check availability of slots
-                    5. use /help to know how I work
-                    6. use /share to share me with family and friends
-
-                    Thank you for choosing me. I am glad to help you and others. Share with other people too.
+Thank you for choosing me. I am glad to help you and others. Share with other people too.
             """
             # send the welcoming message
             bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
@@ -289,9 +342,20 @@ def respond():
             punch = joke['setup'] +" " +  joke['punchline']
             bot.sendMessage(chat_id=chat_id, text=punch, reply_to_message_id=msg_id)
 
+        ###########share####################
+
+        elif text=="/share":
+            link = """
+Getting vaccination is first step to win over this covid-war. 
+Join me to get slots info, news and more here.  
+https://t.me/VaccinationslotBot
+please share with your family and friends!
+            """
+            bot.sendMessage(chat_id=chat_id, text=link, reply_to_message_id=msg_id)
+
             ### /check availability #########################
         elif text == "/check_availability":
-            bot_check_avail = "HI! Give me Your location"
+            bot_check_avail = "Hi! Tell me your location"
             keys_inline = []
             keys_inline.append([InlineKeyboardButton(text='Pincode',callback_data='pin_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
             reply_markup = InlineKeyboardMarkup(keys_inline)
@@ -322,14 +386,14 @@ def respond():
             bot_text = ''
             if subscrib:
                 print(subscrib)
-                bot_text = 'Here are Your Subcriptions:\n'
+                bot_text = 'These are your subcriptions:\n'
                 bot_text += '{}\n{}'.format('\n'.join(subscrib['dis']),'\n'.join(subscrib['pin']))
             else:
-                bot_text = 'You have no subcriptions!'
+                bot_text = 'You have no subcription!'
             bot.sendMessage(chat_id=chat_id, text=bot_text, reply_to_message_id=msg_id)
 
         elif text == "/add_subcription":
-            bot_subscribe = "HI! Let's Subscribe Your region:" 
+            bot_subscribe = "Hi! Let's subscribe your home:" 
 
             keys_inline = []
             keys_inline.append([InlineKeyboardButton(text='Pincode',callback_data='pin_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
@@ -339,7 +403,7 @@ def respond():
             update_user(chat_id,'status','SUBSCRIBE')
 
         elif text == "/news":
-            bot_news = "For which region you want data?"
+            bot_news = "Tell me the place for which you want news!"
             keys_inline = []
             keys_inline.append([InlineKeyboardButton(text='State',callback_data='state_slot'),InlineKeyboardButton(text='District',callback_data='dis_slot')])
             reply_markup = InlineKeyboardMarkup(keys_inline)
@@ -412,14 +476,14 @@ def respond():
                 covid_req = {}
                 if text in country.get_flat_states():
                     covid_req = covid_data_state_dict[text]
-                    covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} state. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
+                    covid_text = 'Hey! There are {} no. of active cases and {} people recovered from coronavirus in {} state. And only {} no. of deaths reported due to covid. So, Don\'t worry. \nTotal confirmed cases are {}.\nStay home Stay safe!'.format(covid_req['new_active'],covid_req['new_cured'],covid_req['state_name'],covid_req['new_death'],covid_req['new_positive'])
                     pr_quo= pr_quo_list[0]
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)   
                     bot.sendMessage(chat_id=chat_id, text=pr_quo)
                     
                 elif text in covid_data_district_dict:
                     covid_req = covid_data_district_dict[text]
-                    covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths held due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
+                    covid_text = 'Hey! There are {} no. of active cases and {} recovered from coronavirus in {} District. And only {} no. of deaths reported due to covid. So, Don\'t worry. \nTotal confirmed cases are {}'.format(covid_req['active'],covid_req['recovered'],text,covid_req['deceased'],covid_req['confirmed'])
                     pr_quo= pr_quo_list[0]
                     bot.sendMessage(chat_id=chat_id, text=covid_text, reply_to_message_id=msg_id)
                     bot.sendMessage(chat_id=chat_id, text=pr_quo)
@@ -473,7 +537,6 @@ def respond():
     except Exception as e:
         # if things went wrong
         print('error',e)
-        bot.sendMessage(chat_id=chat_id, text="There was a problem in the name you used, please enter different name", reply_to_message_id=msg_id)
 
     return 'ok'
 
